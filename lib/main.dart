@@ -1,8 +1,18 @@
+import 'package:eminkardeslerapp/core/auth/auth_manager.dart';
 import 'package:eminkardeslerapp/login/login.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiProvider(
+    providers: [
+      Provider<AuthenticationManager>(
+        create: (context) => AuthenticationManager(context: context),
+        lazy: true,
+      )
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
