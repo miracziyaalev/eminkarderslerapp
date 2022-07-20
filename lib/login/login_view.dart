@@ -9,6 +9,11 @@ import './login_view_model.dart';
 class LoginView extends LoginViewModel with LoginResources {
   final String tikButton = 'Giriş Yap';
 
+  final GlobalKey<FormState> formKey = GlobalKey();
+
+  final TextEditingController controllerEmail = TextEditingController();
+  final TextEditingController controllerPassword = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,57 +23,68 @@ class LoginView extends LoginViewModel with LoginResources {
           child: SizedBox(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            child: Column(
-              children: [
-                const Expanded(
-                  child: SizedBox(
-                    height: CoreSizedBox.mediumSizedBoxHeight,
+            child: Form(
+              key: formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Column(
+                children: [
+                  const Expanded(
+                    child: SizedBox(
+                      height: CoreSizedBox.mediumSizedBoxHeight,
+                    ),
                   ),
-                ),
-                Image.asset(ImageItemsCore().emkaLogo),
-                Expanded(
-                  child: Padding(
-                    padding: ProjectPaddingCore().paddingAllLow,
-                    child: const Expanded(child: _LoginPageTextWidget()),
+                  Image.asset(ImageItemsCore().emkaLogo),
+                  Expanded(
+                    child: Padding(
+                      padding: ProjectPaddingCore().paddingAllLow,
+                      child: const Expanded(child: _LoginPageTextWidget()),
+                    ),
                   ),
-                ),
-                const Expanded(child: Text(LanguageItems.appName)),
-                Expanded(
-                  child: TextFormField(
-                    //maxLength: 20,
-                    textInputAction: TextInputAction
-                        .next, //direkt sonraki textfielda yonlendiriyor
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: _InputDecorater().userNameInput,
+                  const Expanded(child: Text(LanguageItems.appName)),
+                  Expanded(
+                    child: TextFormField(
+                      controller: controllerEmail,
+                      //maxLength: 20,
+                      textInputAction: TextInputAction
+                          .next, //direkt sonraki textfielda yonlendiriyor
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: _InputDecorater().userNameInput,
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: ProjectPaddingCore().paddingVerticalLow,
-                    child: Expanded(
-                      child: TextFormField(
-                        keyboardType: TextInputType.visiblePassword,
-                        decoration: _InputDecorater().passwordInput,
+                  Expanded(
+                    child: Padding(
+                      padding: ProjectPaddingCore().paddingVerticalLow,
+                      child: Expanded(
+                        child: TextFormField(
+                          controller: controllerPassword,
+                          keyboardType: TextInputType.visiblePassword,
+                          decoration: _InputDecorater().passwordInput,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {},
-                        child: Text(tikButton),
-                        style: ElevatedButton.styleFrom(
-                          primary: Colors.red,
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            if (formKey.currentState?.validate() ?? false) {
+                              fetchUserLogin(controllerEmail.text,
+                                  controllerPassword.text);
+                            }
+                          },
+                          child: Text(tikButton),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.red,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const Spacer()
-              ],
+                  const Spacer()
+                ],
+              ),
             ),
           ),
         ),
