@@ -39,6 +39,7 @@ class _HomeViewState extends State<HomeView> with CacheManager {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          AuthenticationManager(context: context).removeAllData();
           
         },
       ),

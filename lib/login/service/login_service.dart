@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:eminkardeslerapp/login/model/user_request_model.dart';
 import 'package:eminkardeslerapp/login/model/user_response_model.dart';
