@@ -1,5 +1,6 @@
 import 'package:eminkardeslerapp/core/auth/auth_manager.dart';
 import 'package:eminkardeslerapp/core/cache/cache_manager.dart';
+import 'package:eminkardeslerapp/screens/countdown.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -39,10 +40,14 @@ class _HomeViewState extends State<HomeView> with CacheManager {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          AuthenticationManager(context: context).removeAllData();
-          
+          navigateToCountDown();
         },
       ),
     );
+  }
+
+  void navigateToCountDown() {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => const CountDown()));
   }
 }
