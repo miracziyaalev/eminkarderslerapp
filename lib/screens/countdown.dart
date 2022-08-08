@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:ui';
 
-import 'package:eminkardeslerapp/core/core_padding.dart';
 import 'package:flutter/material.dart';
 
 class CountDown extends StatefulWidget {
@@ -16,6 +14,9 @@ class _CountDownState extends State<CountDown> {
   Duration duration = const Duration();
   Timer? timer;
   Duration lastDurationOfSayac = const Duration();
+  Duration lastDurationOfAriza = const Duration();
+  Duration lastDurationOfBakim = const Duration();
+  Duration lastDurationOfKesinti = const Duration();
 
   bool isCountDown = false;
   @override
@@ -67,54 +68,115 @@ class _CountDownState extends State<CountDown> {
     var customWidth = MediaQuery.of(context).size.width;
     var customHeight = MediaQuery.of(context).size.height;
     return Scaffold(
+      appBar: AppBar(backgroundColor: Colors.transparent),
       body: SafeArea(
         child: Container(
-          height: customHeight,
-          width: customWidth,
-          child: Center(
-            child: Column(
-              children: [
-                Expanded(
+          child: Column(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Container(
+                  color: Colors.amber,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        buildTime(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Container(
                   child: Column(
                     children: [
-                      Expanded(
-                          flex: 5,
-                          child: Padding(
-                            padding: ProjectPaddingCore().paddingAllLow,
-                            child: Container(
-                                width: MediaQuery.of(context).size.width * 0.4,
-                                child: buildTime()),
-                          )),
-                      Expanded(flex: 2, child: buildButtons()),
-                      Expanded(
-                          flex: 1,
-                          child: Center(
-                              child: Padding(
-                            padding: ProjectPaddingCore().paddingAllLow,
-                            child: FittedBox(
-                              fit: BoxFit.contain,
-                              child: Text(
-                                '$lastDurationOfSayac',
-                                style: TextStyle(fontSize: 100),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ))),
+                      SizedBox(
+                        width: customWidth,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              buildButtonsAriza(
+                                  durum: 'Ariza', arizaDeger: true),
+                              buildButtonsBakim(
+                                  durum: 'Bakim', bakimDeger: false),
+                              buildButtonsKesinti(durum: 'Kesinti'),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(),
                     ],
                   ),
                 ),
-                Expanded(
-                  child: Container(color: Colors.blue),
-                )
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget buildButtons() {
+  Widget buildButtonsAriza({required String durum, required bool arizaDeger}) {
+    final isRunning = timer == null ? false : timer!.isActive;
+    final isCompleted = duration.inSeconds == 0;
+
+    return isRunning || !isCompleted && arizaDeger
+        ? Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              buildSituationCard(
+                  duration: lastDurationOfAriza,
+                  situation: 'Ariza Durdur',
+                  onTap: () {
+                    lastDurationOfAriza += duration;
+                    arizaDeger = false;
+                    stopTimer();
+                  })
+            ],
+          )
+        : buildSituationCard(
+            duration: lastDurationOfAriza,
+            situation: durum,
+            onTap: () {
+              startTimer();
+              arizaDeger = true;
+            });
+  }
+
+  Widget buildButtonsBakim({required String durum, required bool bakimDeger}) {
+    final isRunning = timer == null ? false : timer!.isActive;
+    final isCompleted = duration.inSeconds == 0;
+
+    return isRunning || !isCompleted && bakimDeger
+        ? Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              buildSituationCard(
+                  duration: lastDurationOfBakim,
+                  situation: 'Bakim Durdur',
+                  onTap: () {
+                    lastDurationOfBakim += duration;
+                    bakimDeger = false;
+                    stopTimer();
+                  })
+            ],
+          )
+        : buildSituationCard(
+            duration: lastDurationOfBakim,
+            situation: durum,
+            onTap: () {
+              startTimer();
+              bakimDeger = true;
+            });
+  }
+
+  Widget buildButtonsKesinti({required String durum}) {
     final isRunning = timer == null ? false : timer!.isActive;
     final isCompleted = duration.inSeconds == 0;
 
@@ -122,37 +184,22 @@ class _CountDownState extends State<CountDown> {
         ? Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              buttonWidget(
-                  text: isRunning ? 'Durdur' : "Devam",
-                  onPressed: () {
-                    if (isRunning) {
-                      stopTimer(resets: false);
-                    } else {
-                      startTimer(resets: false);
-                    }
-                  }),
-              const SizedBox(
-                width: 12,
-              ),
-              buttonWidget(
-                  text: 'Iptal',
-                  onPressed: () {
-                    lastDurationOfSayac += duration;
+              buildSituationCard(
+                  duration: lastDurationOfKesinti,
+                  situation: 'Kesinti Durdur',
+                  onTap: () {
+                    lastDurationOfKesinti += duration;
 
                     stopTimer();
                   })
             ],
           )
-        : Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              buttonWidget(
-                  text: 'Basla',
-                  onPressed: () {
-                    startTimer();
-                  }),
-            ],
-          );
+        : buildSituationCard(
+            duration: lastDurationOfKesinti,
+            situation: durum,
+            onTap: () {
+              startTimer();
+            });
   }
 
   Widget buildTime() {
@@ -162,57 +209,78 @@ class _CountDownState extends State<CountDown> {
     final seconds = twoDigits(duration.inSeconds.remainder(60));
 
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Flexible(child: buildTimeCard(time: hours, header: 'SAAT')),
+        buildTimeCard(time: hours, header: 'SAAT'),
         const SizedBox(width: 8),
-        Flexible(child: buildTimeCard(time: minutes, header: 'DAKIKA')),
+        buildTimeCard(time: minutes, header: 'DAKIKA'),
         const SizedBox(width: 8),
-        Flexible(child: buildTimeCard(time: seconds, header: 'SANIYE')),
+        buildTimeCard(time: seconds, header: 'SANIYE'),
       ],
     );
   }
 
   Widget buttonWidget(
           {required String text, required VoidCallback onPressed}) =>
-      ElevatedButton(onPressed: onPressed, child: Text(text));
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [ElevatedButton(onPressed: onPressed, child: Text(text))],
+      );
+
+  Widget buildSituationCard(
+      {required String situation,
+      required VoidCallback onTap,
+      required Duration duration}) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              situation,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontSize: 40,
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text(duration.toString()),
+        ],
+      ),
+    );
+  }
 
   Widget buildTimeCard({required String time, required String header}) =>
       Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Expanded(
-            flex: 2,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Center(
-                child: FittedBox(
-                  fit: BoxFit.fitHeight,
-                  child: Text(
-                    time,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      fontSize: 500,
-                    ),
-                  ),
-                ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              time,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontSize: 160,
               ),
             ),
           ),
           const SizedBox(height: 24),
-          Expanded(
-              child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: FittedBox(
-                fit: BoxFit.fitHeight,
-                child: Text(
-                  header,
-                  style: TextStyle(fontSize: 150),
-                )),
-          )),
+          Text(
+            header,
+            style: const TextStyle(fontSize: 30),
+          ),
         ],
       );
 }

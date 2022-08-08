@@ -1,4 +1,5 @@
 import 'package:eminkardeslerapp/login/login_resource.dart';
+import 'package:eminkardeslerapp/screens/countdown.dart';
 import 'package:flutter/material.dart';
 
 import '../core/core_image.dart';
@@ -33,7 +34,7 @@ class LoginView extends LoginViewModel with LoginResources {
                       height: CoreSizedBox.mediumSizedBoxHeight,
                     ),
                   ),
-                  Image.asset(ImageItemsCore().emkaLogo),
+                  Image.asset(ImageItemsCore().emkaLogo, cacheHeight: 300),
                   Expanded(
                     child: Padding(
                       padding: ProjectPaddingCore().paddingAllLow,
@@ -69,10 +70,15 @@ class LoginView extends LoginViewModel with LoginResources {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            if (formKey.currentState?.validate() ?? false) {
-                              fetchUserLogin(controllerEmail.text,
-                                  controllerPassword.text);
-                            }
+                            //  if (formKey.currentState?.validate() ?? false) {
+                            //    fetchUserLogin(controllerEmail.text,
+                            //        controllerPassword.text);
+                            //  }
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const CountDown()),
+                            );
                           },
                           child: Text(tikButton),
                           style: ElevatedButton.styleFrom(
