@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:ui';
 
+import 'package:eminkardeslerapp/core/core_padding.dart';
 import 'package:flutter/material.dart';
 
 class CountDown extends StatefulWidget {
@@ -61,27 +63,56 @@ class _CountDownState extends State<CountDown> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        body: SafeArea(
-          child: Container(
-            height: 300,
-            color: Colors.amber,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  buildTime(),
-                  const SizedBox(height: 40),
-                  buildButtons(),
-                  const SizedBox(height: 40),
-                  Text('$lastDurationOfSayac'),
-                ],
-              ),
+  Widget build(BuildContext context) {
+    var customWidth = MediaQuery.of(context).size.width;
+    var customHeight = MediaQuery.of(context).size.height;
+    return Scaffold(
+      body: SafeArea(
+        child: Container(
+          height: customHeight,
+          width: customWidth,
+          child: Center(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                          flex: 5,
+                          child: Padding(
+                            padding: ProjectPaddingCore().paddingAllLow,
+                            child: Container(
+                                width: MediaQuery.of(context).size.width * 0.4,
+                                child: buildTime()),
+                          )),
+                      Expanded(flex: 2, child: buildButtons()),
+                      Expanded(
+                          flex: 1,
+                          child: Center(
+                              child: Padding(
+                            padding: ProjectPaddingCore().paddingAllLow,
+                            child: FittedBox(
+                              fit: BoxFit.contain,
+                              child: Text(
+                                '$lastDurationOfSayac',
+                                style: TextStyle(fontSize: 100),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ))),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Container(color: Colors.blue),
+                )
+              ],
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 
   Widget buildButtons() {
     final isRunning = timer == null ? false : timer!.isActive;
@@ -106,17 +137,22 @@ class _CountDownState extends State<CountDown> {
               buttonWidget(
                   text: 'Iptal',
                   onPressed: () {
-                    lastDurationOfSayac = duration;
+                    lastDurationOfSayac += duration;
 
                     stopTimer();
                   })
             ],
           )
-        : buttonWidget(
-            text: 'Basla',
-            onPressed: () {
-              startTimer();
-            });
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              buttonWidget(
+                  text: 'Basla',
+                  onPressed: () {
+                    startTimer();
+                  }),
+            ],
+          );
   }
 
   Widget buildTime() {
@@ -126,45 +162,57 @@ class _CountDownState extends State<CountDown> {
     final seconds = twoDigits(duration.inSeconds.remainder(60));
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        buildTimeCard(time: hours, header: 'SAAT'),
+        Flexible(child: buildTimeCard(time: hours, header: 'SAAT')),
         const SizedBox(width: 8),
-        buildTimeCard(time: minutes, header: 'DAKIKA'),
+        Flexible(child: buildTimeCard(time: minutes, header: 'DAKIKA')),
         const SizedBox(width: 8),
-        buildTimeCard(time: seconds, header: 'SANIYE'),
+        Flexible(child: buildTimeCard(time: seconds, header: 'SANIYE')),
       ],
     );
   }
 
   Widget buttonWidget(
           {required String text, required VoidCallback onPressed}) =>
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [ElevatedButton(onPressed: onPressed, child: Text(text))],
-      );
+      ElevatedButton(onPressed: onPressed, child: Text(text));
 
   Widget buildTimeCard({required String time, required String header}) =>
       Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              time,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                fontSize: 60,
+          Expanded(
+            flex: 2,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.fitHeight,
+                  child: Text(
+                    time,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      fontSize: 500,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
           const SizedBox(height: 24),
-          Text(header),
+          Expanded(
+              child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: FittedBox(
+                fit: BoxFit.fitHeight,
+                child: Text(
+                  header,
+                  style: TextStyle(fontSize: 150),
+                )),
+          )),
         ],
       );
 }
