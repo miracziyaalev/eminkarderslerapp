@@ -1,6 +1,5 @@
 import 'package:eminkardeslerapp/core/auth/auth_manager.dart';
 import 'package:eminkardeslerapp/login/login.dart';
-import 'package:eminkardeslerapp/screens/countdown.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +23,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      home: const CountDown(),
+      home: Login(),
       theme: ThemeData.dark().copyWith(),
     );
   }
