@@ -1,5 +1,6 @@
 import 'package:eminkardeslerapp/login/login_resource.dart';
 import 'package:eminkardeslerapp/screens/countdown.dart';
+import 'package:eminkardeslerapp/screens/home_page.dart';
 import 'package:flutter/material.dart';
 
 import '../core/core_image.dart';
@@ -77,7 +78,7 @@ class LoginView extends LoginViewModel with LoginResources {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const CountDown()),
+                                  builder: (context) => const HomePage()),
                             );
                           },
                           child: Text(tikButton),

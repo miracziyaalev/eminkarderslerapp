@@ -1,5 +1,5 @@
 import 'package:eminkardeslerapp/core/auth/auth_manager.dart';
-import 'package:eminkardeslerapp/login/login.dart';
+import 'package:eminkardeslerapp/screens/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      home: Login(),
+      home: const HomePage(),
       theme: ThemeData.dark().copyWith(),
     );
   }

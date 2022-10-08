@@ -73,32 +73,14 @@ class _CountDownState extends State<CountDown> {
     var customHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      appBar: AppBar(
-        actions: <Widget>[
-          SizedBox(
-            width: customWidth * 0.4,
-            //color: Colors.amber,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                customElevatedButton2(insideText: 'Profil Sayfası'),
-                customElevatedButton2(insideText: 'Dökümanlar'),
-                customElevatedButton2(insideText: 'İş Emirleri'),
-                customElevatedButton2(insideText: 'Zaman'),
-              ],
-            ),
-          ),
-        ],
-        backgroundColor: Colors.transparent,
-      ),
       body: SafeArea(
         child: Container(
           child: Column(
             children: [
               Expanded(
-                flex: 2,
+                flex: 3,
                 child: Container(
-                  color: Colors.deepOrange.shade900,
+                  color: const Color.fromARGB(255, 151, 37, 2),
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
