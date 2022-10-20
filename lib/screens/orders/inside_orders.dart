@@ -1,5 +1,6 @@
 import 'package:eminkardeslerapp/order/model/post.dart';
 import 'package:flutter/material.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 
 class InsideOrdersPage extends StatelessWidget {
   final WorkOrders orders;
@@ -207,13 +208,31 @@ class InsideOrdersWidget extends StatelessWidget {
                             ),
                           ),
                           Expanded(
-                            flex: 1,
-                            child: Container(
-                                color: Colors.black,
-                                height: customHeight2,
-                                child: InkWell(
-                                    onTap: () {},
-                                    child: const Icon(Icons.start_outlined))),
+                            flex: 2,
+                            child: InkWell(
+                              onTap: () {},
+                              child: AnimatedButton(
+                                text: 'Operasyonu Baslat',
+                                pressEvent: () {
+                                  AwesomeDialog(
+                                    context: context,
+                                    dialogType: DialogType.info,
+                                    headerAnimationLoop: false,
+                                    animType: AnimType.bottomSlide,
+                                    title: 'Bilgilendirme',
+                                    desc:
+                                        'Operasyonu başlatmak istediğinize emin misiniz?',
+                                    buttonsTextStyle:
+                                        const TextStyle(color: Colors.black),
+                                    showCloseIcon: true,
+                                    btnCancelText: 'Iptal',
+                                    btnOkText: "Tamam",
+                                    btnCancelOnPress: () {},
+                                    btnOkOnPress: () {},
+                                  ).show();
+                                },
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -252,6 +271,8 @@ class WorkOrdersInfoImgWidget extends StatelessWidget {
     );
   }
 }
+
+_showInfoDialog(context) {}
 
 class WorkOrdersInfoWidget extends StatelessWidget {
   const WorkOrdersInfoWidget({
