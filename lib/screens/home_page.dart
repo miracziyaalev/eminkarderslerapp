@@ -1,21 +1,28 @@
+import 'package:eminkardeslerapp/core/constants.dart';
 import 'package:eminkardeslerapp/core/core_image.dart';
-import 'package:eminkardeslerapp/login/login.dart';
+import 'package:eminkardeslerapp/screens/login.dart';
 import 'package:eminkardeslerapp/screens/countdown.dart';
-import 'package:eminkardeslerapp/screens/orders/dynamic_work_orders.dart';
+import 'package:eminkardeslerapp/screens/orders/work_orders_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'documents.dart';
+import 'profile_screen.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+class Home extends StatefulWidget {
+  const Home({Key? key}) : super(key: key);
 
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     var customWidth = MediaQuery.of(context).size.width;
     var customHeight = MediaQuery.of(context).size.height;
 
     const List<Tab> myTabs = <Tab>[
-      Tab(text: 'Dökümanlar', icon: Icon(Icons.document_scanner)),
+      Tab(text: 'Profil Sayfası', icon: Icon(Icons.person_outline_rounded)),
       Tab(text: 'İş Emirleri', icon: Icon(Icons.workspace_premium_sharp)),
       Tab(text: 'Zaman', icon: Icon(Icons.timelapse_sharp)),
     ];
@@ -33,8 +40,8 @@ class HomePage extends StatelessWidget {
           backgroundColor: Colors.transparent,
         ),
         body: const TabBarView(children: [
-          Documents(),
-          DynamicWorkOrder(),
+          ProfileScreen(),
+          WorkOrdersScreen(),
           CountDown(),
         ]),
         drawer: Drawer(
@@ -54,7 +61,7 @@ class HomePage extends StatelessWidget {
               Expanded(child: Column()),
               Column(
                 children: [
-                  const Center(child: Text('Mirac Ziya Alev')),
+                  Center(child: Text(Constants.userName)),
                   const SizedBox(
                     height: 100,
                   ),
@@ -67,11 +74,15 @@ class HomePage extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: InkWell(
-                              onTap: (() {
+                              onTap: (() async {
+                                SharedPreferences prefs =
+                                    await SharedPreferences.getInstance();
+                                prefs.clear();
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => Login()),
+                                      builder: (context) =>
+                                          const LoginScreen()),
                                 );
                               }),
                               child: const Icon(Icons.power_settings_new_sharp,

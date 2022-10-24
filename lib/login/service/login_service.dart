@@ -1,32 +1,29 @@
-import 'dart:io';
-import 'package:dio/dio.dart';
-import 'package:eminkardeslerapp/login/model/user_request_model.dart';
-import 'package:eminkardeslerapp/login/model/user_response_model.dart';
+import 'dart:convert';
 
-abstract class ILoginService {
-  final String path = '/api/login';
+import 'package:eminkardeslerapp/core/constants.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
-  ILoginService(this.dio);
-
-  Future<UserResponseModel?> fetchLogin(UserRequestModel model);
-
-  final Dio dio;
-}
-
-class LoginService extends ILoginService {
-  LoginService(Dio dio) : super(dio);
-
-  @override
-  Future<UserResponseModel?> fetchLogin(UserRequestModel model) async {
+class LoginServices {
+  static Future<bool?> fetchUserLogin(String email, String password) async {
     try {
-      final response = await dio.post(path, data: model);
-      if (response.statusCode == HttpStatus.ok) {
-        return UserResponseModel.fromJson(response.data);
+      var response = await http.post(
+          Uri.parse(Constants.baseURL + Constants.loginEndURL),
+          headers: {"content-type": "application/json"},
+          body: jsonEncode({'userName': email, 'password': password}));
+      if (response.statusCode == 200) {
+        var json = jsonDecode(response.body);
+        Constants.bearerToken = json["token"];
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+
+        await prefs.setString("userName", email);
+        await prefs.setString("password", password);
+        return true;
       } else {
-        throw Exception('Request Error: ${response.statusCode}');
+        return false;
       }
     } on Exception {
-      rethrow;
+      return null;
     }
   }
 }
