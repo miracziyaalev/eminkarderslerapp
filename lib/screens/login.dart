@@ -76,7 +76,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const Home()),
+                                    builder: (context) => const Home(
+                                          screenValue: 0,
+                                        )),
                               );
                             } else if (value != null && !value) {
                               const snackBar = SnackBar(

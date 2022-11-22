@@ -1,8 +1,12 @@
 import 'dart:async';
 
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:eminkardeslerapp/core/core_padding.dart';
 import 'package:eminkardeslerapp/order/model/inside_orders_model.dart';
+import 'package:eminkardeslerapp/order/model/order_materials_model.dart';
 import 'package:eminkardeslerapp/order/services/inside_orders_service.dart';
+import 'package:eminkardeslerapp/order/services/materials_service.dart';
+import 'package:eminkardeslerapp/screens/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -105,6 +109,8 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                           alignment: Alignment.centerLeft,
                                           child: Container(
                                             child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: const [
                                                 Expanded(
                                                     child: Text('İş Emri No:')),
@@ -224,7 +230,7 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                           ),
                                         ),
                                         Expanded(
-                                          flex: 1,
+                                          flex: 3,
                                           child: Container(
                                             child: Column(
                                               mainAxisAlignment:
@@ -292,6 +298,13 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                             )),
                                           ),
                                         ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: modalBottomSheet(
+                                              customHeight2: customHeight2,
+                                              item: item,
+                                              customWidth2: customWidth2),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -318,6 +331,207 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
         child: const Icon(Icons.replay),
         backgroundColor: const Color.fromARGB(255, 131, 5, 5),
       ),
+    );
+  }
+}
+
+class modalBottomSheet extends StatefulWidget {
+  const modalBottomSheet({
+    Key? key,
+    required this.customHeight2,
+    required this.item,
+    required this.customWidth2,
+  }) : super(key: key);
+
+  final double customHeight2;
+  final GetInsideOrdersInfoModel item;
+
+  final double customWidth2;
+
+  @override
+  State<modalBottomSheet> createState() => _modalBottomSheetState();
+}
+
+class _modalBottomSheetState extends State<modalBottomSheet> {
+  List<GetOrdersMaterials>? materials;
+
+  void getMaterial() {
+    GetMaterialsOrders.fetchMaterialsData(
+            widget.item.evrakNo, widget.item.rSiraNo)
+        .then((value) {
+      if (value != null) {
+        materials = value;
+        return materials;
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    getMaterial();
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var customWidth = MediaQuery.of(context).size.width;
+    var customHeight = MediaQuery.of(context).size.height;
+    int screenValue = 2;
+
+    return InkWell(
+      onTap: () {
+        getMaterial();
+        showModalBottomSheet<void>(
+          context: context,
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(70))),
+          builder: (BuildContext context) {
+            return SafeArea(
+              child: Padding(
+                padding: ProjectPaddingCore().paddingAllHigh,
+                child: Column(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Container(
+                        height: customHeight * 0.1,
+                        width: customWidth * 0.45,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.grey),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Expanded(
+                                flex: 1,
+                                child: Container(
+                                  child: Text("   Operasyon: " +
+                                      widget.item.operasyonAd),
+                                )),
+                            Expanded(
+                                flex: 1,
+                                child: Container(
+                                  child: Text("Operasyon Sıra Numarası: " +
+                                      widget.item.rSiraNo.toString()),
+                                )),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const Expanded(
+                        child: SizedBox(
+                      height: 10,
+                    )),
+                    Expanded(
+                      flex: 9,
+                      child: ListView.builder(
+                          itemCount: materials?.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            var iter = materials![index];
+                            return Padding(
+                              padding: ProjectPaddingCore().paddingAllLow,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(30),
+                                    color: Colors.blueGrey),
+                                height: customHeight * 0.04,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Expanded(
+                                            flex: 1,
+                                            child: Center(
+                                                child: Text(iter.rKaynakkodu))),
+                                        Expanded(
+                                            flex: 2,
+                                            child:
+                                                Center(child: Text(iter.ad))),
+                                        Expanded(
+                                            flex: 1,
+                                            child: Center(
+                                                child: Text(iter.lotNumber))),
+                                        Expanded(
+                                            flex: 1,
+                                            child: Center(
+                                                child: Text(
+                                                    iter.rMiktar0.toString()))),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
+                    ),
+                    Expanded(
+                        flex: 4,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Container(
+                              height: customHeight * 0.1,
+                              width: customWidth * 0.2,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: Colors.grey),
+                              child:
+                                  const Center(child: Text("Çevrim Süresi: ")),
+                            ),
+                            InkWell(
+                              onTap: (() {
+                                AwesomeDialog(
+                                  context: context,
+                                  dialogType: DialogType.info,
+                                  title:
+                                      "İş Emrini almak istediğinize emin misiniz?",
+                                  btnCancelOnPress: () {},
+                                  btnCancelText: "İptal",
+                                  btnOkText: "Evet",
+                                  btnOkOnPress: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (newContext) => const Home(
+                                                  screenValue: 2,
+                                                )));
+                                  },
+                                ).show();
+                              }),
+                              borderRadius: BorderRadius.circular(20),
+                              child: Ink(
+                                height: customHeight * 0.1,
+                                width: customWidth * 0.2,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: Colors.green),
+                                child: const Center(child: Text("İş Emri Al")),
+                              ),
+                            ),
+                          ],
+                        ))
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+      child: Container(
+          height: widget.customHeight2 * 0.5,
+          width: widget.customWidth2 * 0.5,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.blueGrey[600],
+          ),
+          child: const Icon(
+            Icons.keyboard_double_arrow_down_outlined,
+            size: 50,
+          )),
     );
   }
 }

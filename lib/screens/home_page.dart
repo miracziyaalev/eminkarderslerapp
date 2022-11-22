@@ -1,7 +1,6 @@
 import 'package:eminkardeslerapp/core/constants.dart';
-import 'package:eminkardeslerapp/core/core_image.dart';
+import 'package:eminkardeslerapp/screens/final_screen.dart';
 import 'package:eminkardeslerapp/screens/login.dart';
-import 'package:eminkardeslerapp/screens/countdown.dart';
 import 'package:eminkardeslerapp/screens/orders/work_orders_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,7 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'profile_screen.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  final int screenValue;
+  const Home({Key? key, required this.screenValue}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -24,10 +24,11 @@ class _HomeState extends State<Home> {
     const List<Tab> myTabs = <Tab>[
       Tab(text: 'Profil Sayfası', icon: Icon(Icons.person_outline_rounded)),
       Tab(text: 'İş Emirleri', icon: Icon(Icons.workspace_premium_sharp)),
-      Tab(text: 'Zaman', icon: Icon(Icons.timelapse_sharp)),
+      Tab(text: 'Operasyon', icon: Icon(Icons.timelapse_sharp)),
     ];
 
     return DefaultTabController(
+      initialIndex: widget.screenValue,
       length: myTabs.length,
       child: Scaffold(
         appBar: AppBar(
@@ -42,7 +43,7 @@ class _HomeState extends State<Home> {
         body: const TabBarView(children: [
           ProfileScreen(),
           WorkOrdersScreen(),
-          CountDown(),
+          FinalScreen(),
         ]),
         drawer: Drawer(
           child: ListView(
@@ -50,9 +51,9 @@ class _HomeState extends State<Home> {
             children: [
               DrawerHeader(
                 child: Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage(ImageItemsCore().miracFoto),
+                      image: AssetImage('assets/image.jpg'),
                       fit: BoxFit.contain,
                     ),
                   ),
@@ -99,26 +100,6 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-}
-
-Widget customElevatedButton2({
-  required String insideText,
-}) {
-  return Container(
-    decoration: BoxDecoration(borderRadius: BorderRadius.circular(60)),
-    child: SizedBox(
-      width: 120,
-      height: 50,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(primary: Colors.white),
-        onPressed: () {},
-        child: Text(
-          insideText,
-          style: const TextStyle(color: Colors.black),
-        ),
-      ),
-    ),
-  );
 }
 
 class SearchFieldDrawer extends StatelessWidget {

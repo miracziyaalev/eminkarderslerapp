@@ -42,6 +42,9 @@ dependencies:
   awesome_dialog: ^3.0.0
   rxdart: ^0.27.5
   http: ^0.13.5
+  dropdown_plus: ^0.0.9
+  dropdown_button2: ^1.8.9
+  animated_custom_dropdown: ^1.2.2
   
 dev_dependencies:
   flutter_test:

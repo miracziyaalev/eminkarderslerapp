@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:eminkardeslerapp/core/constants.dart';
-import 'package:eminkardeslerapp/screens/login.dart';
+import 'package:eminkardeslerapp/machine_state.dart';
+import 'package:eminkardeslerapp/providers/final_screen_providers.dart';
 import 'package:eminkardeslerapp/login/service/login_service.dart';
 import 'package:eminkardeslerapp/screens/home_page.dart';
+import 'package:eminkardeslerapp/screens/login.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -69,25 +72,34 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      home: StreamBuilder<bool>(
-          stream: streamController.stream,
-          builder: (context, snapshot) {
-            switch (snapshot.data) {
-              case true:
-                return const Home();
-              case false:
-                return const LoginScreen();
+    return MultiProvider(
+      providers: [ChangeNotifierProvider(create: (context) => FinalProvider())],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        home: StreamBuilder<bool>(
+            stream: streamController.stream,
+            builder: (context, snapshot) {
+              switch (snapshot.data) {
+                case true:
+                  //homescreen
+                  //return const Home(
+                  //  screenValue: 0,
+                  // );
+                  return const MachinesState();
+                case false:
+                  //loginscreen
+                  //return const LoginScreen();
+                  return const MachinesState();
 
-              default:
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-            }
-          }),
-      theme: ThemeData.dark().copyWith(),
+                default:
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+              }
+            }),
+        theme: ThemeData.dark().copyWith(),
+      ),
     );
   }
 }
