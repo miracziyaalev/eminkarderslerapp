@@ -1,4 +1,5 @@
 import 'package:eminkardeslerapp/core/constants.dart';
+import 'package:eminkardeslerapp/screens/final_machine.dart';
 import 'package:eminkardeslerapp/screens/final_screen.dart';
 import 'package:eminkardeslerapp/screens/login.dart';
 import 'package:eminkardeslerapp/screens/orders/work_orders_screen.dart';
@@ -25,6 +26,9 @@ class _HomeState extends State<Home> {
       Tab(text: 'Profil Sayfası', icon: Icon(Icons.person_outline_rounded)),
       Tab(text: 'İş Emirleri', icon: Icon(Icons.workspace_premium_sharp)),
       Tab(text: 'Operasyon', icon: Icon(Icons.timelapse_sharp)),
+      Tab(
+          text: 'Üretim Sahası',
+          icon: Icon(Icons.auto_awesome_mosaic_outlined)),
     ];
 
     return DefaultTabController(
@@ -44,6 +48,7 @@ class _HomeState extends State<Home> {
           ProfileScreen(),
           WorkOrdersScreen(),
           FinalScreen(),
+          FinalMachineState()
         ]),
         drawer: Drawer(
           child: ListView(

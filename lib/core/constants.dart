@@ -3,12 +3,14 @@ import 'package:flutter/cupertino.dart';
 
 class Constants {
   static String baseURL = "http://emkaapi.somee.com/api/";
+
   static String loginEndURL = "Account/Login";
   static String getUserInfoUrl = "Account/GetUserInfo";
   static String getWorkOrdersUrl = "Mmps10e/getIsEmri";
   static String getInsideOrdersUrl = "Mmps10e/getOrders/";
   static String getMaterialsUrl = "Operation/getOperationDetail?EvrakNo=";
   static String getCycleUrl = "getCevrimSuresi?BomrecCode=";
+  static String GetAllTezgahStatus = "Tezgah/GetAllTezgahStatus";
 
   static String bearerToken = "";
   static String userName = "";

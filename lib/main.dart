@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:eminkardeslerapp/core/constants.dart';
-import 'package:eminkardeslerapp/machine_state.dart';
 import 'package:eminkardeslerapp/providers/final_screen_providers.dart';
 import 'package:eminkardeslerapp/login/service/login_service.dart';
 import 'package:eminkardeslerapp/screens/home_page.dart';
@@ -86,11 +85,13 @@ class _MyAppState extends State<MyApp> {
                   //return const Home(
                   //  screenValue: 0,
                   // );
-                  return const MachinesState();
+                  return const Home(
+                    screenValue: 0,
+                  );
                 case false:
                   //loginscreen
                   //return const LoginScreen();
-                  return const MachinesState();
+                  return const LoginScreen();
 
                 default:
                   return const Center(
