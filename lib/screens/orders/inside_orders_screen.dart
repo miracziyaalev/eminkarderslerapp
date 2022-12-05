@@ -512,7 +512,13 @@ class _modalBottomSheetState extends State<modalBottomSheet> {
                             ),
                             InkWell(
                               onTap: (() {
-                                getMachineStateAvailable();
+                                //getMachineStateAvailable();
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => const AlertDialog(
+                                    title: Text("data"),
+                                  ),
+                                );
                               }),
                               borderRadius: BorderRadius.circular(20),
                               child: Ink(
