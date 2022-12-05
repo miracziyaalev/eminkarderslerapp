@@ -37,6 +37,7 @@ class _FinalMachineStateState extends State<FinalMachineState> {
     GetMachineStateService.fetchMachineStatesInfo().then((value) {
       if (value != null) {
         machineStates = value;
+
         if (!streamController.isClosed) {
           streamController.add(STATE.loadedScreen);
         }

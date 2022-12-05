@@ -14,7 +14,7 @@ class GetMachineStateService {
         Uri.parse(Constants.baseURL + Constants.GetAllTezgahStatus),
         headers: {"content-type": "application/json"},
       );
-      print(response.body);
+
       if (response.statusCode == 200) {
         var machineStates = (json.decode(response.body) as List)
             .map((i) => GetMachineStateModel.fromJson(i))

@@ -1,16 +1,16 @@
 import 'dart:async';
 
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:eminkardeslerapp/core/core_padding.dart';
 import 'package:eminkardeslerapp/order/model/inside_orders_model.dart';
+import 'package:eminkardeslerapp/order/model/machine_model.dart';
 import 'package:eminkardeslerapp/order/model/order_materials_model.dart';
 import 'package:eminkardeslerapp/order/services/inside_orders_service.dart';
 import 'package:eminkardeslerapp/order/services/materials_service.dart';
-import 'package:eminkardeslerapp/screens/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../order/model/orders_model.dart';
+import '../../order/services/tezgah/get_machine_service.dart';
 
 enum STATE { loadingScreen, loadedScreen, connectionErrorScreen }
 
@@ -366,10 +366,38 @@ class _modalBottomSheetState extends State<modalBottomSheet> {
     });
   }
 
+  void getMachineStateAvailable() {
+    String dropdownvalue = 'Item 1';
+    GetMachineStateService.fetchMachineStatesInfo().then((value) {
+      if (value != null) {
+        var machineStates = value;
+        var items = machineStates.where((e) => e.state == false);
+        print(items);
+
+        return showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            actions: [
+              DropdownButton(
+                value: dropdownvalue,
+                items: machineStates
+                    .map((item) => DropdownMenuItem<GetMachineStateModel>(
+                        value: item, child: Text(item.workBenchCode)))
+                    .toList(),
+                onChanged: (newValue) {
+                  setState(() {});
+                },
+              )
+            ],
+          ),
+        );
+      }
+    });
+  }
+
   @override
   void initState() {
     getMaterial();
-
     super.initState();
   }
 
@@ -484,23 +512,7 @@ class _modalBottomSheetState extends State<modalBottomSheet> {
                             ),
                             InkWell(
                               onTap: (() {
-                                AwesomeDialog(
-                                  context: context,
-                                  dialogType: DialogType.info,
-                                  title:
-                                      "İş Emrini almak istediğinize emin misiniz?",
-                                  btnCancelOnPress: () {},
-                                  btnCancelText: "İptal",
-                                  btnOkText: "Evet",
-                                  btnOkOnPress: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (newContext) => const Home(
-                                                  screenValue: 2,
-                                                )));
-                                  },
-                                ).show();
+                                getMachineStateAvailable();
                               }),
                               borderRadius: BorderRadius.circular(20),
                               child: Ink(
