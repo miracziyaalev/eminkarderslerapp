@@ -29,4 +29,31 @@ class GetMachineStateService {
       log(e.toString());
     }
   }
+
+  static Future<List<GetMachineStateModel>?>
+      fetchMachineStatesFreeInfo() async {
+    try {
+      var response = await http.get(
+        Uri.parse(Constants.baseURL + Constants.GetAllTezgahStatus),
+        headers: {"content-type": "application/json"},
+      );
+
+      if (response.statusCode == 200) {
+        var machineStates = (json.decode(response.body) as List)
+            .map((i) => GetMachineStateModel.fromJson(i))
+            .toList();
+        var dropdownItems =
+            machineStates.where((e) => e.state == false).toList();
+
+        return dropdownItems;
+      } else {
+        // If the server did not return a 200 OK response,
+        // then throw an exception.
+        throw Exception('Failed to load info');
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+    return null;
+  }
 }

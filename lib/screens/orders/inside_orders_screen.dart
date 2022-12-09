@@ -66,12 +66,23 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
     super.dispose();
   }
 
+  GetMachineStateModel? getMachineStateAvailable() {
+    GetMachineStateService.fetchMachineStatesFreeInfo().then((value) {
+      if (value != null) {
+        var machineStatesFree = value;
+        return machineStatesFree;
+      }
+    });
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final model =
         ModalRoute.of(context)!.settings.arguments as GetWorkOrdersInfModel;
     var customWidth2 = MediaQuery.of(context).size.width;
     var customHeight2 = MediaQuery.of(context).size.height;
+    final machineState = getMachineStateAvailable();
     return Scaffold(
       appBar: AppBar(),
       body: StreamBuilder<STATE>(
@@ -301,6 +312,7 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                         Expanded(
                                           flex: 2,
                                           child: modalBottomSheet(
+                                              freeMachineState: machineState,
                                               customHeight2: customHeight2,
                                               item: item,
                                               customWidth2: customWidth2),
@@ -336,9 +348,12 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
 }
 
 class modalBottomSheet extends StatefulWidget {
-  const modalBottomSheet({
+  var freeMachineState;
+
+  modalBottomSheet({
     Key? key,
     required this.customHeight2,
+    required this.freeMachineState,
     required this.item,
     required this.customWidth2,
   }) : super(key: key);
@@ -366,33 +381,14 @@ class _modalBottomSheetState extends State<modalBottomSheet> {
     });
   }
 
-  void getMachineStateAvailable() {
-    String dropdownvalue = 'Item 1';
-    GetMachineStateService.fetchMachineStatesInfo().then((value) {
+  GetMachineStateModel? getMachineStateAvailable() {
+    GetMachineStateService.fetchMachineStatesFreeInfo().then((value) {
       if (value != null) {
-        var machineStates = value;
-        var items = machineStates.where((e) => e.state == false);
-        print(items);
-
-        return showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            actions: [
-              DropdownButton(
-                value: dropdownvalue,
-                items: machineStates
-                    .map((item) => DropdownMenuItem<GetMachineStateModel>(
-                        value: item, child: Text(item.workBenchCode)))
-                    .toList(),
-                onChanged: (newValue) {
-                  setState(() {});
-                },
-              )
-            ],
-          ),
-        );
+        var machineStatesFree = value;
+        return machineStatesFree;
       }
     });
+    return null;
   }
 
   @override
@@ -406,10 +402,12 @@ class _modalBottomSheetState extends State<modalBottomSheet> {
     var customWidth = MediaQuery.of(context).size.width;
     var customHeight = MediaQuery.of(context).size.height;
     int screenValue = 2;
+    var makinaDurum = getMachineStateAvailable();
 
     return InkWell(
       onTap: () {
         getMaterial();
+
         showModalBottomSheet<void>(
           context: context,
           shape: const RoundedRectangleBorder(
@@ -512,13 +510,44 @@ class _modalBottomSheetState extends State<modalBottomSheet> {
                             ),
                             InkWell(
                               onTap: (() {
-                                //getMachineStateAvailable();
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => const AlertDialog(
-                                    title: Text("data"),
-                                  ),
-                                );
+                                GetMachineStateService
+                                        .fetchMachineStatesFreeInfo()
+                                    .then((value) {
+                                  if (value != null) {
+                                    var machineStatesFree = value;
+                                    DropdownButton(
+                                      value:
+                                          machineStatesFree.first.workBenchName,
+                                      items: machineStatesFree.map((e) {
+                                        return DropdownMenuItem(
+                                          child: Text(e.workBenchName),
+                                          value: e.workBenchName,
+                                        );
+                                      }).toList(),
+                                      onChanged: (String? value) {
+                                        // This is called when the user selects an item.
+                                        setState(() {});
+                                      },
+                                    );
+
+                                    return showModalBottomSheet(
+                                      context: context,
+                                      builder: (context) =>
+                                          AlertDialogFreeStateWidget(
+                                              machineStatesFree:
+                                                  machineStatesFree),
+                                    );
+                                  } else {
+                                    return showDialog(
+                                      context: context,
+                                      builder: (context) => const AlertDialog(
+                                        title:
+                                            Text("Boş Tezgah Bulunmamaktadır."),
+                                        actions: [],
+                                      ),
+                                    );
+                                  }
+                                });
                               }),
                               borderRadius: BorderRadius.circular(20),
                               child: Ink(
@@ -550,6 +579,46 @@ class _modalBottomSheetState extends State<modalBottomSheet> {
             Icons.keyboard_double_arrow_down_outlined,
             size: 50,
           )),
+    );
+  }
+}
+
+class AlertDialogFreeStateWidget extends StatefulWidget {
+  const AlertDialogFreeStateWidget({
+    Key? key,
+    required this.machineStatesFree,
+  }) : super(key: key);
+
+  final List<GetMachineStateModel> machineStatesFree;
+
+  @override
+  State<AlertDialogFreeStateWidget> createState() =>
+      _AlertDialogFreeStateWidgetState();
+}
+
+class _AlertDialogFreeStateWidgetState
+    extends State<AlertDialogFreeStateWidget> {
+  String selectedValue = "CNC TORNA 4";
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 300,
+      child: DropdownButton(
+        value: selectedValue,
+        items: widget.machineStatesFree.map((e) {
+          return DropdownMenuItem(
+            child: Text(e.workBenchName),
+            value: e.workBenchName,
+          );
+        }).toList(),
+        onChanged: (dynamic? value) {
+          // This is called when the user selects an item.
+          setState(() {
+            selectedValue = value!;
+          });
+        },
+      ),
     );
   }
 }

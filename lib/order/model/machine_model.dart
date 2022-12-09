@@ -46,6 +46,8 @@ class GetMachineStateModel {
         process: json["process"] ?? "",
       );
 
+  get first => null;
+
   Map<String, dynamic> toJson() => {
         "workBenchCode": workBenchCode,
         "workBenchName": workBenchName,
