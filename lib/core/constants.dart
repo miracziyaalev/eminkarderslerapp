@@ -21,3 +21,9 @@ class Constants {
 
   static BorderRadius cardBorderRadius = BorderRadius.circular(20);
 }
+
+class CustomSize {
+  static double width = 0.0;
+  static double height = 0.0;
+  static int counter = 1;
+}

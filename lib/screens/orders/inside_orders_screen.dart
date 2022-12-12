@@ -1,14 +1,18 @@
 import 'dart:async';
 
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:eminkardeslerapp/core/core_padding.dart';
 import 'package:eminkardeslerapp/order/model/inside_orders_model.dart';
 import 'package:eminkardeslerapp/order/model/machine_model.dart';
 import 'package:eminkardeslerapp/order/model/order_materials_model.dart';
+import 'package:eminkardeslerapp/order/services/add_personal_IE.dart';
 import 'package:eminkardeslerapp/order/services/inside_orders_service.dart';
 import 'package:eminkardeslerapp/order/services/materials_service.dart';
+import 'package:eminkardeslerapp/screens/orders/showModalOrders.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../core/constants.dart';
 import '../../order/model/orders_model.dart';
 import '../../order/services/tezgah/get_machine_service.dart';
 
@@ -23,11 +27,16 @@ class InsideOrderScreen extends StatefulWidget {
 
 class _InsideOrderScreenState extends State<InsideOrderScreen> {
   late StreamController<STATE> streamController;
-  late List<GetInsideOrdersInfoModel> insideOrders;
+  late StreamController<bool> streamControllerModal;
 
+  late List<GetInsideOrdersInfoModel> insideOrders;
+  late List<GetOrdersMaterials> materials;
+  late List<GetMachineStateModel> getMachineStateModel;
+  late String selectedValue;
   @override
   void initState() {
     streamController = BehaviorSubject<STATE>();
+    streamControllerModal = BehaviorSubject<bool>();
     super.initState();
   }
 
@@ -63,6 +72,7 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
   @override
   void dispose() {
     streamController.close();
+    streamControllerModal.close();
     super.dispose();
   }
 
@@ -76,12 +86,20 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
     return null;
   }
 
+  Future<void> getMaterial(String evrakNo, int rSiraNo) async {
+    await GetMaterialsOrders.fetchMaterialsData(evrakNo, rSiraNo).then((value) {
+      if (value != null) {
+        materials = value;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final model =
         ModalRoute.of(context)!.settings.arguments as GetWorkOrdersInfModel;
-    var customWidth2 = MediaQuery.of(context).size.width;
-    var customHeight2 = MediaQuery.of(context).size.height;
+    CustomSize.width = MediaQuery.of(context).size.width;
+    CustomSize.height = MediaQuery.of(context).size.height;
     final machineState = getMachineStateAvailable();
     return Scaffold(
       appBar: AppBar(),
@@ -111,81 +129,12 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20),
                                       color: Colors.blueGrey),
-                                  child: Row(
-                                    children: [
-                                      Padding(
-                                        padding:
-                                            ProjectPaddingCore().paddingAllHigh,
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Container(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: const [
-                                                Expanded(
-                                                    child: Text('İş Emri No:')),
-                                                Expanded(
-                                                    child: Text('Mamul Adı:')),
-                                                Expanded(
-                                                    child: Text('Stok Kodu:')),
-                                                Expanded(
-                                                    child: Text(
-                                                        'Üretim Miktarı:')),
-                                                Expanded(
-                                                    child: Text('Müşteri:')),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            ProjectPaddingCore().paddingAllHigh,
-                                        child: Container(
-                                          child: Align(
-                                            alignment: Alignment.centerRight,
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                    child: Text(model.evrakno)),
-                                                Expanded(child: Text(model.ad)),
-                                                Expanded(
-                                                    child: Text(
-                                                        model.mamulstokkodu)),
-                                                Expanded(
-                                                    child: Text(model
-                                                        .sFToplammiktar
-                                                        .toString())),
-                                                Expanded(
-                                                    child:
-                                                        Text(model.musteriAd)),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                  child: partInfos(model),
                                 ),
                                 const SizedBox(
                                   width: 20,
                                 ),
-                                Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.22,
-                                  height:
-                                      MediaQuery.of(context).size.width * 0.22,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20),
-                                      image: const DecorationImage(
-                                        image: AssetImage("assets/image.jpg"),
-                                        fit: BoxFit.fill,
-                                      ),
-                                      color: Colors.blueGrey),
-                                ),
+                                partImage(context),
                               ],
                             ),
                           ),
@@ -204,8 +153,8 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                               return Padding(
                                 padding: ProjectPaddingCore().paddingAllMedium,
                                 child: Container(
-                                  height: customHeight2 * 0.2,
-                                  width: customWidth2 * 0.4,
+                                  height: CustomSize.height * 0.2,
+                                  width: CustomSize.width * 0.4,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
                                     color: Colors.blueGrey,
@@ -311,11 +260,211 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                         ),
                                         Expanded(
                                           flex: 2,
-                                          child: modalBottomSheet(
-                                              freeMachineState: machineState,
-                                              customHeight2: customHeight2,
-                                              item: item,
-                                              customWidth2: customWidth2),
+                                          child: ModalBottomSheet(
+                                              onPressed: () async {
+                                            await getMaterial(
+                                                insideOrders[index].evrakNo,
+                                                insideOrders[index].rSiraNo);
+                                            await GetMachineStateService
+                                                    .fetchMachineStatesFreeInfo()
+                                                .then((value) {
+                                              if (value != null &&
+                                                  value.isNotEmpty) {
+                                                getMachineStateModel = value;
+                                                selectedValue =
+                                                    value.first.workBenchCode;
+                                              }
+                                            });
+                                            await showModalBottomSheet<void>(
+                                              context: context,
+                                              shape:
+                                                  const RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.vertical(
+                                                              top: Radius
+                                                                  .circular(
+                                                                      70))),
+                                              builder: (BuildContext context) {
+                                                return StreamBuilder<bool>(
+                                                    stream:
+                                                        streamControllerModal
+                                                            .stream,
+                                                    builder:
+                                                        (context, snapshot) {
+                                                      return SafeArea(
+                                                        child: Padding(
+                                                          padding:
+                                                              ProjectPaddingCore()
+                                                                  .paddingAllHigh,
+                                                          child: Column(
+                                                            children: [
+                                                              Expanded(
+                                                                flex: 2,
+                                                                child:
+                                                                    Container(
+                                                                  height: CustomSize
+                                                                          .height *
+                                                                      0.1,
+                                                                  width: CustomSize
+                                                                          .width *
+                                                                      0.45,
+                                                                  decoration: BoxDecoration(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              20),
+                                                                      color: Colors
+                                                                          .grey),
+                                                                  child: Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .spaceAround,
+                                                                    children: [
+                                                                      Expanded(
+                                                                          flex:
+                                                                              1,
+                                                                          child:
+                                                                              Container(
+                                                                            child:
+                                                                                Text("   Operasyon:${insideOrders[index].operasyonAd}"),
+                                                                          )),
+                                                                      Expanded(
+                                                                          flex:
+                                                                              1,
+                                                                          child:
+                                                                              Container(
+                                                                            child:
+                                                                                Text("Operasyon Sıra Numarası:${insideOrders[index].rSiraNo} "),
+                                                                          )),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              const Expanded(
+                                                                  child:
+                                                                      SizedBox(
+                                                                height: 10,
+                                                              )),
+                                                              Expanded(
+                                                                flex: 9,
+                                                                child: materials
+                                                                        .isNotEmpty
+                                                                    ? ListView.builder(
+                                                                        itemCount: materials.length,
+                                                                        itemBuilder: (BuildContext context, int index) {
+                                                                          var iter =
+                                                                              materials[index];
+                                                                          return Padding(
+                                                                            padding:
+                                                                                ProjectPaddingCore().paddingAllLow,
+                                                                            child:
+                                                                                Container(
+                                                                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(30), color: Colors.blueGrey),
+                                                                              height: CustomSize.height * 0.04,
+                                                                              child: Column(
+                                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                                children: [
+                                                                                  Row(
+                                                                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                                                                    children: [
+                                                                                      Expanded(flex: 1, child: Center(child: Text(iter.rKaynakkodu))),
+                                                                                      Expanded(flex: 2, child: Center(child: Text(iter.ad))),
+                                                                                      Expanded(flex: 1, child: Center(child: Text(iter.lotNumber))),
+                                                                                      Expanded(flex: 1, child: Center(child: Text(iter.rMiktar0.toString()))),
+                                                                                    ],
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                            ),
+                                                                          );
+                                                                        })
+                                                                    : Container(),
+                                                              ),
+                                                              Expanded(
+                                                                  flex: 4,
+                                                                  child: Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .spaceAround,
+                                                                    children: [
+                                                                      Container(
+                                                                        height: CustomSize.height *
+                                                                            0.1,
+                                                                        width: CustomSize.width *
+                                                                            0.2,
+                                                                        decoration: BoxDecoration(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(20),
+                                                                            color: Colors.grey),
+                                                                        child: const Center(
+                                                                            child:
+                                                                                Text("Çevrim Süresi: ")),
+                                                                      ),
+                                                                      DropdownButton(
+                                                                        value:
+                                                                            selectedValue,
+                                                                        items: getMachineStateModel
+                                                                            .map((e) {
+                                                                          return DropdownMenuItem(
+                                                                              child: Text(e.workBenchName),
+                                                                              value: e.workBenchCode);
+                                                                        }).toList(),
+                                                                        onChanged:
+                                                                            (String?
+                                                                                value) {
+                                                                          selectedValue =
+                                                                              value ?? getMachineStateModel.first.workBenchName;
+                                                                          streamControllerModal
+                                                                              .add(true);
+                                                                        },
+                                                                      ),
+                                                                      InkWell(
+                                                                        onTap:
+                                                                            (() async {
+                                                                          AwesomeDialog(
+                                                                                  width: CustomSize.width * 0.6,
+                                                                                  context: context,
+                                                                                  title: "Operasyon baslasın mı ?",
+                                                                                  btnOkOnPress: () async {
+                                                                                    await AddPersonalIE.addPersonnelIE(selectedValue, model.evrakno, index * 10, 11553).then((value) {
+                                                                                      AwesomeDialog(
+                                                                                        width: CustomSize.width * 0.6,
+                                                                                        context: context,
+                                                                                        body: Text(value ?? "Unknown"),
+                                                                                        btnOkOnPress: () {},
+                                                                                        btnOkText: "Tamam",
+                                                                                      ).show();
+                                                                                    });
+                                                                                  },
+                                                                                  btnOkText: "Evet",
+                                                                                  btnCancelOnPress: () {},
+                                                                                  btnCancelText: "Hayır")
+                                                                              .show();
+                                                                        }),
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(20),
+                                                                        child:
+                                                                            Ink(
+                                                                          height:
+                                                                              CustomSize.width * 0.1,
+                                                                          width:
+                                                                              CustomSize.width * 0.2,
+                                                                          decoration: BoxDecoration(
+                                                                              borderRadius: BorderRadius.circular(20),
+                                                                              color: Colors.green),
+                                                                          child:
+                                                                              const Center(child: Text("İş Emri Al")),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ))
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    });
+                                              },
+                                            );
+                                          }),
                                         ),
                                       ],
                                     ),
@@ -345,240 +494,69 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
       ),
     );
   }
-}
 
-class modalBottomSheet extends StatefulWidget {
-  var freeMachineState;
-
-  modalBottomSheet({
-    Key? key,
-    required this.customHeight2,
-    required this.freeMachineState,
-    required this.item,
-    required this.customWidth2,
-  }) : super(key: key);
-
-  final double customHeight2;
-  final GetInsideOrdersInfoModel item;
-
-  final double customWidth2;
-
-  @override
-  State<modalBottomSheet> createState() => _modalBottomSheetState();
-}
-
-class _modalBottomSheetState extends State<modalBottomSheet> {
-  List<GetOrdersMaterials>? materials;
-
-  void getMaterial() {
-    GetMaterialsOrders.fetchMaterialsData(
-            widget.item.evrakNo, widget.item.rSiraNo)
-        .then((value) {
-      if (value != null) {
-        materials = value;
-        return materials;
-      }
-    });
+  Row partInfos(GetWorkOrdersInfModel model) {
+    return Row(
+      children: [
+        infoKeys(),
+        infoValues(model),
+      ],
+    );
   }
 
-  GetMachineStateModel? getMachineStateAvailable() {
-    GetMachineStateService.fetchMachineStatesFreeInfo().then((value) {
-      if (value != null) {
-        var machineStatesFree = value;
-        return machineStatesFree;
-      }
-    });
-    return null;
-  }
-
-  @override
-  void initState() {
-    getMaterial();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    var customWidth = MediaQuery.of(context).size.width;
-    var customHeight = MediaQuery.of(context).size.height;
-    int screenValue = 2;
-    var makinaDurum = getMachineStateAvailable();
-
-    return InkWell(
-      onTap: () {
-        getMaterial();
-
-        showModalBottomSheet<void>(
-          context: context,
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(70))),
-          builder: (BuildContext context) {
-            return SafeArea(
-              child: Padding(
-                padding: ProjectPaddingCore().paddingAllHigh,
-                child: Column(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        height: customHeight * 0.1,
-                        width: customWidth * 0.45,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Colors.grey),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Expanded(
-                                flex: 1,
-                                child: Container(
-                                  child: Text("   Operasyon: " +
-                                      widget.item.operasyonAd),
-                                )),
-                            Expanded(
-                                flex: 1,
-                                child: Container(
-                                  child: Text("Operasyon Sıra Numarası: " +
-                                      widget.item.rSiraNo.toString()),
-                                )),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const Expanded(
-                        child: SizedBox(
-                      height: 10,
-                    )),
-                    Expanded(
-                      flex: 9,
-                      child: ListView.builder(
-                          itemCount: materials?.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            var iter = materials![index];
-                            return Padding(
-                              padding: ProjectPaddingCore().paddingAllLow,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(30),
-                                    color: Colors.blueGrey),
-                                height: customHeight * 0.04,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        Expanded(
-                                            flex: 1,
-                                            child: Center(
-                                                child: Text(iter.rKaynakkodu))),
-                                        Expanded(
-                                            flex: 2,
-                                            child:
-                                                Center(child: Text(iter.ad))),
-                                        Expanded(
-                                            flex: 1,
-                                            child: Center(
-                                                child: Text(iter.lotNumber))),
-                                        Expanded(
-                                            flex: 1,
-                                            child: Center(
-                                                child: Text(
-                                                    iter.rMiktar0.toString()))),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }),
-                    ),
-                    Expanded(
-                        flex: 4,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Container(
-                              height: customHeight * 0.1,
-                              width: customWidth * 0.2,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: Colors.grey),
-                              child:
-                                  const Center(child: Text("Çevrim Süresi: ")),
-                            ),
-                            InkWell(
-                              onTap: (() {
-                                GetMachineStateService
-                                        .fetchMachineStatesFreeInfo()
-                                    .then((value) {
-                                  if (value != null) {
-                                    var machineStatesFree = value;
-                                    DropdownButton(
-                                      value:
-                                          machineStatesFree.first.workBenchName,
-                                      items: machineStatesFree.map((e) {
-                                        return DropdownMenuItem(
-                                          child: Text(e.workBenchName),
-                                          value: e.workBenchName,
-                                        );
-                                      }).toList(),
-                                      onChanged: (String? value) {
-                                        // This is called when the user selects an item.
-                                        setState(() {});
-                                      },
-                                    );
-
-                                    return showModalBottomSheet(
-                                      context: context,
-                                      builder: (context) =>
-                                          AlertDialogFreeStateWidget(
-                                              machineStatesFree:
-                                                  machineStatesFree),
-                                    );
-                                  } else {
-                                    return showDialog(
-                                      context: context,
-                                      builder: (context) => const AlertDialog(
-                                        title:
-                                            Text("Boş Tezgah Bulunmamaktadır."),
-                                        actions: [],
-                                      ),
-                                    );
-                                  }
-                                });
-                              }),
-                              borderRadius: BorderRadius.circular(20),
-                              child: Ink(
-                                height: customHeight * 0.1,
-                                width: customWidth * 0.2,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    color: Colors.green),
-                                child: const Center(child: Text("İş Emri Al")),
-                              ),
-                            ),
-                          ],
-                        ))
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-      child: Container(
-          height: widget.customHeight2 * 0.5,
-          width: widget.customWidth2 * 0.5,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: Colors.blueGrey[600],
+  Padding infoKeys() {
+    return Padding(
+      padding: ProjectPaddingCore().paddingAllHigh,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Expanded(child: Text('İş Emri No:')),
+              Expanded(child: Text('Mamul Adı:')),
+              Expanded(child: Text('Stok Kodu:')),
+              Expanded(child: Text('Üretim Miktarı:')),
+              Expanded(child: Text('Müşteri:')),
+            ],
           ),
-          child: const Icon(
-            Icons.keyboard_double_arrow_down_outlined,
-            size: 50,
-          )),
+        ),
+      ),
+    );
+  }
+
+  Padding infoValues(GetWorkOrdersInfModel model) {
+    return Padding(
+      padding: ProjectPaddingCore().paddingAllHigh,
+      child: Container(
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: Text(model.evrakno)),
+              Expanded(child: Text(model.ad)),
+              Expanded(child: Text(model.mamulstokkodu)),
+              Expanded(child: Text(model.sFToplammiktar.toString())),
+              Expanded(child: Text(model.musteriAd)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Container partImage(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.22,
+      height: MediaQuery.of(context).size.width * 0.22,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          image: const DecorationImage(
+            image: AssetImage("assets/image.jpg"),
+            fit: BoxFit.fill,
+          ),
+          color: Colors.blueGrey),
     );
   }
 }
@@ -612,7 +590,7 @@ class _AlertDialogFreeStateWidgetState
             value: e.workBenchName,
           );
         }).toList(),
-        onChanged: (dynamic? value) {
+        onChanged: (String? value) {
           // This is called when the user selects an item.
           setState(() {
             selectedValue = value!;
