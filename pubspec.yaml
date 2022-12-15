@@ -79,6 +79,37 @@ flutter:
     - assets/image.jpg 
     - assets/mirac.png 
     - assets/profil.png 
+    - assets/mamulAssets/
+    - assets/mamulAssets/MM 01 0004.JPG
+    - assets/mamulAssets/YM 04 0014.JPG
+    - assets/mamulAssets/YM 01 0023.JPG
+    - assets/mamulAssets/YM 01 0065.JPG
+    - assets/mamulAssets/YM 04 0012.JPG
+    - assets/mamulAssets/YM 03 0068.JPG
+    - assets/mamulAssets/YM 03 0067.JPG
+    - assets/mamulAssets/YM 03 0067.JPG
+    - assets/mamulAssets/YM 01 0022.JPG
+    - assets/mamulAssets/YM 02 0001.JPG
+    - assets/mamulAssets/MM 01 0806.JPG
+    - assets/mamulAssets/MM 01 0848.JPG
+    - assets/mamulAssets/MM 02 038.JPG
+    - assets/mamulAssets/MM 02 0079.JPG
+    - assets/mamulAssets/MM 03 0079.JPG
+    - assets/mamulAssets/YM 03 0079.JPG
+    - assets/mamulAssets/YM 01 0019.JPG
+    - assets/mamulAssets/YM 01 0018.JPG
+    - assets/mamulAssets/YM 07 0005.JPG
+    - assets/mamulAssets/YM 01 0011.JPG
+    - assets/mamulAssets/YM 01 0002.JPG
+    - assets/mamulAssets/YM 02 0002.JPG
+    - assets/mamulAssets/YM 01 0013.JPG
+    - assets/mamulAssets/MM 01 0606.JPG
+    - assets/mamulAssets/YM 01 0160.JPG
+    - assets/mamulAssets/MM 01 0044.JPG
+    - assets/mamulAssets/MM 01 0024.JPG
+    - assets/mamulAssets/YM 01 0007.JPG
+    - assets/mamulAssets/YM 01 0024.JPG
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:

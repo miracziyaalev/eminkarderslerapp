@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:eminkardeslerapp/core/core_padding.dart';
+import 'package:eminkardeslerapp/order/model/cycle_model.dart';
 import 'package:eminkardeslerapp/order/model/inside_orders_model.dart';
 import 'package:eminkardeslerapp/order/model/machine_model.dart';
 import 'package:eminkardeslerapp/order/model/order_materials_model.dart';
-import 'package:eminkardeslerapp/order/services/add_personal_IE.dart';
+import 'package:eminkardeslerapp/order/services/workOrdersPersonState/add_person_to_ie/add_personal_IE.dart';
+import 'package:eminkardeslerapp/order/services/cycle_service.dart';
 import 'package:eminkardeslerapp/order/services/inside_orders_service.dart';
 import 'package:eminkardeslerapp/order/services/materials_service.dart';
 import 'package:eminkardeslerapp/screens/orders/showModalOrders.dart';
@@ -15,6 +17,7 @@ import 'package:rxdart/rxdart.dart';
 import '../../core/constants.dart';
 import '../../order/model/orders_model.dart';
 import '../../order/services/tezgah/get_machine_service.dart';
+import '../home_page.dart';
 
 enum STATE { loadingScreen, loadedScreen, connectionErrorScreen }
 
@@ -32,7 +35,9 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
   late List<GetInsideOrdersInfoModel> insideOrders;
   late List<GetOrdersMaterials> materials;
   late List<GetMachineStateModel> getMachineStateModel;
+  late List<CycleModel> getCycleModel;
   late String selectedValue;
+  late Future<CycleModel> futureCycle;
   @override
   void initState() {
     streamController = BehaviorSubject<STATE>();
@@ -134,7 +139,7 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                 const SizedBox(
                                   width: 20,
                                 ),
-                                partImage(context),
+                                partImage(context, model),
                               ],
                             ),
                           ),
@@ -275,6 +280,17 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                                     value.first.workBenchCode;
                                               }
                                             });
+                                            await GetCycleTime.fetchCycleData(
+                                                    model.mamulstokkodu,
+                                                    item.rSiraNo)
+                                                .then(
+                                              (value) {
+                                                if (value != null &&
+                                                    value.isNotEmpty) {
+                                                  getCycleModel = value;
+                                                }
+                                              },
+                                            );
                                             await showModalBottomSheet<void>(
                                               context: context,
                                               shape:
@@ -307,7 +323,7 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                                                       0.1,
                                                                   width: CustomSize
                                                                           .width *
-                                                                      0.45,
+                                                                      0.55,
                                                                   decoration: BoxDecoration(
                                                                       borderRadius:
                                                                           BorderRadius.circular(
@@ -321,7 +337,7 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                                                     children: [
                                                                       Expanded(
                                                                           flex:
-                                                                              1,
+                                                                              2,
                                                                           child:
                                                                               Container(
                                                                             child:
@@ -377,7 +393,10 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                                                             ),
                                                                           );
                                                                         })
-                                                                    : Container(),
+                                                                    : Container(
+                                                                        height:
+                                                                            1,
+                                                                      ),
                                                               ),
                                                               Expanded(
                                                                   flex: 4,
@@ -395,9 +414,9 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                                                             borderRadius:
                                                                                 BorderRadius.circular(20),
                                                                             color: Colors.grey),
-                                                                        child: const Center(
+                                                                        child: Center(
                                                                             child:
-                                                                                Text("Çevrim Süresi: ")),
+                                                                                Text("Çevrim Süresi: ${getCycleModel[0].bomrecKaynak0Bv.toString()} ${getCycleModel[0].bomrecKaynak0Bu.toString()} ")),
                                                                       ),
                                                                       DropdownButton(
                                                                         value:
@@ -433,6 +452,12 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                                                                         btnOkOnPress: () {},
                                                                                         btnOkText: "Tamam",
                                                                                       ).show();
+                                                                                      Navigator.push(
+                                                                                        context,
+                                                                                        MaterialPageRoute(
+                                                                                          builder: (context) => const Home(screenValue: 2),
+                                                                                        ),
+                                                                                      );
                                                                                     });
                                                                                   },
                                                                                   btnOkText: "Evet",
@@ -546,14 +571,15 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
     );
   }
 
-  Container partImage(BuildContext context) {
+  Container partImage(BuildContext context, GetWorkOrdersInfModel model) {
     return Container(
       width: MediaQuery.of(context).size.width * 0.22,
       height: MediaQuery.of(context).size.width * 0.22,
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          image: const DecorationImage(
-            image: AssetImage("assets/image.jpg"),
+          image: DecorationImage(
+            image: AssetImage(
+                'assets/mamulAssets/${model.mamulstokkodu.trimRight()}.JPG'),
             fit: BoxFit.fill,
           ),
           color: Colors.blueGrey),

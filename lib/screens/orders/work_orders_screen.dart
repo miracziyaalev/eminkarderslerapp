@@ -97,6 +97,11 @@ class _WorkOrdersScreenState extends State<WorkOrdersScreen> {
                             var item = allModels.isEmpty
                                 ? workOrders[index]
                                 : allModels[index];
+
+                            var item2 = allModels.isEmpty
+                                ? workOrders[index].mamulstokkodu.trimRight()
+                                : allModels[index].mamulstokkodu.trimRight();
+
                             return Card(
                               child: Container(
                                 decoration: BoxDecoration(
@@ -108,10 +113,10 @@ class _WorkOrdersScreenState extends State<WorkOrdersScreen> {
                                     Expanded(
                                       flex: 3,
                                       child: Container(
-                                        decoration: const BoxDecoration(
+                                        decoration: BoxDecoration(
                                           image: DecorationImage(
-                                            image:
-                                                AssetImage('assets/image.jpg'),
+                                            image: AssetImage(
+                                                'assets/mamulAssets/$item2.JPG'),
                                             fit: BoxFit.fill,
                                           ),
                                         ),

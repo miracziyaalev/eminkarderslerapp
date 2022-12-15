@@ -9,8 +9,11 @@ class Constants {
   static String getWorkOrdersUrl = "Mmps10e/getIsEmri";
   static String getInsideOrdersUrl = "Mmps10e/getOrders/";
   static String getMaterialsUrl = "Operation/getOperationDetail?EvrakNo=";
-  static String getCycleUrl = "getCevrimSuresi?BomrecCode=";
+  static String getCycleUrl = "Operation/getCevrimSuresi?BomrecCode=";
   static String GetAllTezgahStatus = "Tezgah/GetAllTezgahStatus";
+  static String getWorktoPerson = "Personel_IE/AddPersonelIE";
+  static String endOfTheDay = "Personel_IE/GunSonuPersonel_IE";
+  static String endOfTheWorkOrder = "Personel_IE/ClosePersonel_IE";
 
   static String bearerToken = "";
   static String userName = "";
@@ -20,6 +23,8 @@ class Constants {
   static var deneme;
 
   static BorderRadius cardBorderRadius = BorderRadius.circular(20);
+
+  static const String pictures = "assets/mamulAssets/";
 }
 
 class CustomSize {

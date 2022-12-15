@@ -15,7 +15,7 @@ class GetCycleTime {
         Uri.parse(Constants.baseURL +
             Constants.getCycleUrl +
             stokcode +
-            '&R_SiraNo=' +
+            '&BomrecSiraNo=' +
             siraNo.toString()),
         headers: {"content-type": "application/json"},
       );

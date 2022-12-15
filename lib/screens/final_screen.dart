@@ -1,5 +1,8 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:eminkardeslerapp/core/constants.dart';
 import 'package:eminkardeslerapp/core/core_padding.dart';
+import 'package:eminkardeslerapp/order/services/workOrdersPersonState/endOfTheDay.dart';
+import 'package:eminkardeslerapp/order/services/workOrdersPersonState/endOfTheWorkOrder.dart';
 import 'package:eminkardeslerapp/providers/final_screen_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -509,11 +512,27 @@ class stopWidget extends StatelessWidget {
           ),
         ),
         InkWell(
-          onTap: !finalProvider.checkState
-              ? () {
-                  debugPrint("günsonu");
-                }
-              : null,
+          onTap: (() async {
+            AwesomeDialog(
+                    width: CustomSize.width * 0.6,
+                    context: context,
+                    title: "Gün sonu vermek istediğinize emin misiniz?",
+                    btnOkOnPress: () async {
+                      await EndOfTheDay.endOfTheDay().then((value) {
+                        AwesomeDialog(
+                          width: CustomSize.width * 0.6,
+                          context: context,
+                          body: Text(value ?? "Unknown"),
+                          btnOkOnPress: () {},
+                          btnOkText: "Tamam",
+                        ).show();
+                      });
+                    },
+                    btnOkText: "Evet",
+                    btnCancelOnPress: () {},
+                    btnCancelText: "Hayır")
+                .show();
+          }),
           highlightColor: Colors.blue.withOpacity(0.4),
           splashColor: Colors.green.withOpacity(0.5),
           child: Ink(
@@ -535,11 +554,27 @@ class stopWidget extends StatelessWidget {
           ),
         ),
         InkWell(
-          onTap: !finalProvider.checkState
-              ? () {
-                  debugPrint("İş Bitimi");
-                }
-              : null,
+          onTap: (() async {
+            AwesomeDialog(
+                    width: CustomSize.width * 0.6,
+                    context: context,
+                    title: "İş emrinin bittiğinden eminiz misiniz?",
+                    btnOkOnPress: () async {
+                      await EndOfTheWorkOrder.endOfTheWorkOrder().then((value) {
+                        AwesomeDialog(
+                          width: CustomSize.width * 0.6,
+                          context: context,
+                          body: Text(value ?? "Unknown"),
+                          btnOkOnPress: () {},
+                          btnOkText: "Tamam",
+                        ).show();
+                      });
+                    },
+                    btnOkText: "Evet",
+                    btnCancelOnPress: () {},
+                    btnCancelText: "Hayır")
+                .show();
+          }),
           highlightColor: Colors.blue.withOpacity(0.4),
           splashColor: Colors.green.withOpacity(0.5),
           child: Ink(

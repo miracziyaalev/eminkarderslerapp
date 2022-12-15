@@ -1,7 +1,7 @@
 import 'package:eminkardeslerapp/core/constants.dart';
+import 'package:eminkardeslerapp/screens/LoginScreen/LoginScreenView/final_login_screen.dart';
 import 'package:eminkardeslerapp/screens/final_machine.dart';
 import 'package:eminkardeslerapp/screens/final_screen.dart';
-import 'package:eminkardeslerapp/screens/login.dart';
 import 'package:eminkardeslerapp/screens/orders/work_orders_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -88,7 +88,7 @@ class _HomeState extends State<Home> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          const LoginScreen()),
+                                          const FinalLoginScreen()),
                                 );
                               }),
                               child: const Icon(Icons.power_settings_new_sharp,

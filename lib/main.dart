@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:eminkardeslerapp/core/constants.dart';
 import 'package:eminkardeslerapp/providers/final_screen_providers.dart';
 import 'package:eminkardeslerapp/login/service/login_service.dart';
+import 'package:eminkardeslerapp/screens/LoginScreen/LoginScreenView/final_login_screen.dart';
 import 'package:eminkardeslerapp/screens/home_page.dart';
-import 'package:eminkardeslerapp/screens/login.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/subjects.dart';
@@ -82,16 +82,14 @@ class _MyAppState extends State<MyApp> {
               switch (snapshot.data) {
                 case true:
                   //homescreen
-                  //return const Home(
-                  //  screenValue: 0,
-                  // );
                   return const Home(
                     screenValue: 0,
                   );
+                //return const FinalLoginScreen();
                 case false:
                   //loginscreen
                   //return const LoginScreen();
-                  return const LoginScreen();
+                  return const FinalLoginScreen();
 
                 default:
                   return const Center(
