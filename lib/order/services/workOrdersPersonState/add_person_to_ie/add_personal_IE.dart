@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:eminkardeslerapp/core/constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddPersonalIE {
   static Future<dynamic> addPersonnelIE(
@@ -20,7 +21,14 @@ class AddPersonalIE {
             "jobNo": jobNo
           }));
 
-      if (response.statusCode == 200 || response.statusCode == 400) {
+      if (response.statusCode == 200) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isHasIE', true);
+
+        return response.body;
+      } else if (response.statusCode == 400) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isHasIE', false);
         return response.body;
       } else {
         return null;

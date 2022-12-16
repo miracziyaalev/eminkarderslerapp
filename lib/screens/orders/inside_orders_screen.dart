@@ -13,6 +13,7 @@ import 'package:eminkardeslerapp/order/services/materials_service.dart';
 import 'package:eminkardeslerapp/screens/orders/showModalOrders.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants.dart';
 import '../../order/model/orders_model.dart';
@@ -31,6 +32,7 @@ class InsideOrderScreen extends StatefulWidget {
 class _InsideOrderScreenState extends State<InsideOrderScreen> {
   late StreamController<STATE> streamController;
   late StreamController<bool> streamControllerModal;
+  late StreamController<bool> streamControllerIsActive;
 
   late List<GetInsideOrdersInfoModel> insideOrders;
   late List<GetOrdersMaterials> materials;
@@ -38,10 +40,31 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
   late List<CycleModel> getCycleModel;
   late String selectedValue;
   late Future<CycleModel> futureCycle;
+  int currentInsideOrderIndex = 0;
+
+  Future<bool> isHasIEChecker() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    Constants.isHasIE = prefs.getBool('isHasIE');
+    if (Constants.isHasIE == true) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   @override
   void initState() {
     streamController = BehaviorSubject<STATE>();
     streamControllerModal = BehaviorSubject<bool>();
+    streamControllerIsActive = BehaviorSubject<bool>();
+
+    isHasIEChecker().then((value) {
+      if (value) {
+        streamControllerIsActive.add(true);
+      } else {
+        streamControllerIsActive.add(false);
+      }
+    });
     super.initState();
   }
 
@@ -78,6 +101,7 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
   void dispose() {
     streamController.close();
     streamControllerModal.close();
+    streamControllerIsActive.close();
     super.dispose();
   }
 
@@ -105,7 +129,10 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
         ModalRoute.of(context)!.settings.arguments as GetWorkOrdersInfModel;
     CustomSize.width = MediaQuery.of(context).size.width;
     CustomSize.height = MediaQuery.of(context).size.height;
+    late List<GetWorkOrdersInfModel> workOrders;
+
     final machineState = getMachineStateAvailable();
+
     return Scaffold(
       appBar: AppBar(),
       body: StreamBuilder<STATE>(
@@ -267,6 +294,7 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                           flex: 2,
                                           child: ModalBottomSheet(
                                               onPressed: () async {
+                                            currentInsideOrderIndex = index;
                                             await getMaterial(
                                                 insideOrders[index].evrakNo,
                                                 insideOrders[index].rSiraNo);
@@ -424,7 +452,7 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                                                         items: getMachineStateModel
                                                                             .map((e) {
                                                                           return DropdownMenuItem(
-                                                                              child: Text(e.workBenchName),
+                                                                              child: Text(e.workBenchCode + ' - ' + e.workBenchName),
                                                                               value: e.workBenchCode);
                                                                         }).toList(),
                                                                         onChanged:
@@ -436,50 +464,89 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                                                               .add(true);
                                                                         },
                                                                       ),
-                                                                      InkWell(
-                                                                        onTap:
-                                                                            (() async {
-                                                                          AwesomeDialog(
-                                                                                  width: CustomSize.width * 0.6,
-                                                                                  context: context,
-                                                                                  title: "Operasyon baslasın mı ?",
-                                                                                  btnOkOnPress: () async {
-                                                                                    await AddPersonalIE.addPersonnelIE(selectedValue, model.evrakno, index * 10, 11553).then((value) {
-                                                                                      AwesomeDialog(
-                                                                                        width: CustomSize.width * 0.6,
-                                                                                        context: context,
-                                                                                        body: Text(value ?? "Unknown"),
-                                                                                        btnOkOnPress: () {},
-                                                                                        btnOkText: "Tamam",
-                                                                                      ).show();
-                                                                                      Navigator.push(
-                                                                                        context,
-                                                                                        MaterialPageRoute(
-                                                                                          builder: (context) => const Home(screenValue: 2),
-                                                                                        ),
-                                                                                      );
-                                                                                    });
-                                                                                  },
-                                                                                  btnOkText: "Evet",
-                                                                                  btnCancelOnPress: () {},
-                                                                                  btnCancelText: "Hayır")
-                                                                              .show();
-                                                                        }),
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(20),
-                                                                        child:
-                                                                            Ink(
-                                                                          height:
-                                                                              CustomSize.width * 0.1,
-                                                                          width:
-                                                                              CustomSize.width * 0.2,
-                                                                          decoration: BoxDecoration(
-                                                                              borderRadius: BorderRadius.circular(20),
-                                                                              color: Colors.green),
-                                                                          child:
-                                                                              const Center(child: Text("İş Emri Al")),
-                                                                        ),
-                                                                      ),
+                                                                      StreamBuilder<
+                                                                              Object>(
+                                                                          stream: streamControllerIsActive
+                                                                              .stream,
+                                                                          builder:
+                                                                              (context, snapshot) {
+                                                                            switch (snapshot.data) {
+                                                                              case false:
+                                                                                return InkWell(
+                                                                                  onTap: (() async {
+                                                                                    AwesomeDialog(
+                                                                                            width: CustomSize.width * 0.6,
+                                                                                            context: context,
+                                                                                            title: "Operasyon baslasın mı ?",
+                                                                                            btnOkOnPress: () async {
+                                                                                              await AddPersonalIE.addPersonnelIE(selectedValue, model.evrakno, (index + 1) * 10, 11553).then((value) {
+                                                                                                AwesomeDialog(
+                                                                                                  width: CustomSize.width * 0.6,
+                                                                                                  context: context,
+                                                                                                  body: Text(value ?? "Unknown"),
+                                                                                                  btnOkOnPress: () {
+                                                                                                    Navigator.push(
+                                                                                                        context,
+                                                                                                        MaterialPageRoute(
+                                                                                                          builder: (_) => const Home(
+                                                                                                            screenValue: 1,
+                                                                                                          ),
+                                                                                                        ));
+                                                                                                  },
+                                                                                                  btnOkText: "Tamam",
+                                                                                                ).show();
+                                                                                                Future.delayed(const Duration(seconds: 4), () {
+                                                                                                  Navigator.push(
+                                                                                                      context,
+                                                                                                      MaterialPageRoute(
+                                                                                                        builder: (_) => Home(
+                                                                                                          allModels: model,
+                                                                                                          getCycleModel: getCycleModel[0],
+                                                                                                          chosenWorkBench: selectedValue,
+                                                                                                          insideOrders: insideOrders[currentInsideOrderIndex],
+                                                                                                          screenValue: 2,
+                                                                                                        ),
+                                                                                                      ));
+                                                                                                });
+                                                                                              });
+                                                                                            },
+                                                                                            btnOkText: "Evet",
+                                                                                            btnCancelOnPress: () {},
+                                                                                            btnCancelText: "Hayır")
+                                                                                        .show();
+                                                                                  }),
+                                                                                  borderRadius: BorderRadius.circular(20),
+                                                                                  child: Ink(
+                                                                                    height: CustomSize.width * 0.1,
+                                                                                    width: CustomSize.width * 0.2,
+                                                                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: Colors.green),
+                                                                                    child: const Center(child: Text("İş Emri Al")),
+                                                                                  ),
+                                                                                );
+                                                                              case true:
+                                                                                return InkWell(
+                                                                                  onTap: (() {}),
+                                                                                  borderRadius: BorderRadius.circular(20),
+                                                                                  child: Ink(
+                                                                                    height: CustomSize.width * 0.1,
+                                                                                    width: CustomSize.width * 0.2,
+                                                                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: const Color.fromARGB(255, 79, 8, 3)),
+                                                                                    child: const Center(child: Text("Aktif iş Emriniz Bulunmaktadır.")),
+                                                                                  ),
+                                                                                );
+                                                                              default:
+                                                                                return InkWell(
+                                                                                  onTap: (() {}),
+                                                                                  borderRadius: BorderRadius.circular(20),
+                                                                                  child: Ink(
+                                                                                    height: CustomSize.width * 0.1,
+                                                                                    width: CustomSize.width * 0.2,
+                                                                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: Colors.green),
+                                                                                    child: const Center(child: Text("default")),
+                                                                                  ),
+                                                                                );
+                                                                            }
+                                                                          }),
                                                                     ],
                                                                   ))
                                                             ],

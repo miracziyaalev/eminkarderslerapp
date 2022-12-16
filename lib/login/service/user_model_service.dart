@@ -19,6 +19,7 @@ class UserInfoService {
       );
 
       if (response.statusCode == 200) {
+        
         return getUserInfoModelFromJson(response.body);
       } else {
         // If the server did not return a 200 OK response,

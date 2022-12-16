@@ -46,6 +46,8 @@ dependencies:
   dropdown_button2: ^1.8.9
   animated_custom_dropdown: ^1.2.2
   lottie: ^2.0.0
+  internet_connection_checker: ^1.0.0+1
+
   
 dev_dependencies:
   flutter_test:
@@ -76,6 +78,7 @@ flutter:
     - assets/EMKA_LOGO_BACKGROUND_transparent.gif
     - assets/dipciktupu.jpg 
     - assets/fb.jpg 
+    - assets/uyariGorseli.png
     - assets/image.jpg 
     - assets/mirac.png 
     - assets/profil.png 

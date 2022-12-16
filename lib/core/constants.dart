@@ -19,12 +19,17 @@ class Constants {
   static String userName = "";
   static String password = "";
   static bool? isLoggedIn;
+  static bool? isHasIE;
   static GetUserInfoModel? testUser;
   static var deneme;
 
   static BorderRadius cardBorderRadius = BorderRadius.circular(20);
 
   static const String pictures = "assets/mamulAssets/";
+
+  static String workOrderIE = "";
+  static String workOrderName = "";
+  static String workOrderCompany = "";
 }
 
 class CustomSize {

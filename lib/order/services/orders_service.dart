@@ -26,7 +26,7 @@ class GetWorkOrdersService {
         throw Exception('Failed to load info');
       }
     } catch (e) {
-      log(e.toString());
+      log(e.toString()); 
     }
   }
 }

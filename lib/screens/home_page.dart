@@ -1,7 +1,11 @@
 import 'package:eminkardeslerapp/core/constants.dart';
+import 'package:eminkardeslerapp/login/model/get_user_model.dart';
+import 'package:eminkardeslerapp/order/model/cycle_model.dart';
+import 'package:eminkardeslerapp/order/model/inside_orders_model.dart';
+import 'package:eminkardeslerapp/order/model/orders_model.dart';
 import 'package:eminkardeslerapp/screens/LoginScreen/LoginScreenView/final_login_screen.dart';
 import 'package:eminkardeslerapp/screens/final_machine.dart';
-import 'package:eminkardeslerapp/screens/final_screen.dart';
+import 'package:eminkardeslerapp/screens/operationPage/views/OperationStateCheckerView.dart';
 import 'package:eminkardeslerapp/screens/orders/work_orders_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,13 +14,31 @@ import 'profile_screen.dart';
 
 class Home extends StatefulWidget {
   final int screenValue;
-  const Home({Key? key, required this.screenValue}) : super(key: key);
+  final GetInsideOrdersInfoModel? insideOrders;
+  final GetUserInfoModel? userSpecificModel;
+  final String? chosenWorkBench;
+  final CycleModel? getCycleModel;
+  final GetWorkOrdersInfModel? allModels;
+  const Home(
+      {Key? key,
+      required this.screenValue,
+      this.insideOrders,
+      this.chosenWorkBench,
+      this.getCycleModel,
+      this.allModels,
+      this.userSpecificModel})
+      : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
+  GetInsideOrdersInfoModel? get insideOrders => widget.insideOrders;
+  String? get chosenWorkBench => widget.chosenWorkBench;
+  CycleModel? get getCycleModel => widget.getCycleModel;
+  GetWorkOrdersInfModel? get allModels => widget.allModels;
+
   @override
   Widget build(BuildContext context) {
     var customWidth = MediaQuery.of(context).size.width;
@@ -44,11 +66,16 @@ class _HomeState extends State<Home> {
           ),
           backgroundColor: Colors.transparent,
         ),
-        body: const TabBarView(children: [
-          ProfileScreen(),
-          WorkOrdersScreen(),
-          FinalScreen(),
-          FinalMachineState()
+        body: TabBarView(children: [
+          const ProfileScreen(),
+          const WorkOrdersScreen(),
+          OperationStateCheckerView(
+            allModels: allModels,
+            getCycleModel: getCycleModel,
+            chosenWorkBench: chosenWorkBench,
+            insideOrders: insideOrders,
+          ),
+          const FinalMachineState()
         ]),
         drawer: Drawer(
           child: ListView(
