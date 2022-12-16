@@ -60,6 +60,15 @@ class _FinalScreenState extends State<FinalScreen> {
   late StreamController<bool> streamControllerStop;
   TextEditingController textController = TextEditingController();
   TextEditingController textController2 = TextEditingController();
+  bool isStop = false;
+
+  Future<bool> isStopOrder() async {
+    if (isStop == true) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   Future<bool> hasConnection() async {
     bool hasInternet = false;
@@ -81,6 +90,13 @@ class _FinalScreenState extends State<FinalScreen> {
   @override
   void initState() {
     //  constValues().then((value) => getConsValues());
+    isStopOrder().then((value) {
+      if (value) {
+        streamControllerStop.add(true);
+      } else {
+        streamControllerStop.add(false);
+      }
+    });
 
     streamController = BehaviorSubject<bool>();
     streamControllerStop = BehaviorSubject<bool>();
@@ -90,7 +106,7 @@ class _FinalScreenState extends State<FinalScreen> {
   @override
   void dispose() {
     streamController.close();
-    streamController.close();
+    streamControllerStop.close();
     textController.dispose();
     textController2.dispose();
 
@@ -99,7 +115,8 @@ class _FinalScreenState extends State<FinalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final checkStateProvider = Provider.of<FinalProvider>(context);
+    final checkStateProvider =
+        Provider.of<CheckStateProvider>(context).checkState;
 
     int flexValue_ = 3;
     CustomSize.height = MediaQuery.of(context).size.height;
@@ -222,14 +239,14 @@ class _FinalScreenState extends State<FinalScreen> {
                           child: Container(
                             width: CustomSize.width,
                             decoration: BoxDecoration(
-                              color: !checkStateProvider.checkState
+                              color: !checkStateProvider
                                   ? Colors.green.shade900
                                   : Colors.red,
                               borderRadius: Constants.cardBorderRadius,
                             ),
                             child: Center(
                               child: Text(
-                                !checkStateProvider.checkState
+                                !checkStateProvider
                                     ? "Operasyon Devam Ediyor."
                                     : "Operasyon Durduruldu.",
                                 style: const TextStyle(
@@ -256,135 +273,262 @@ class _FinalScreenState extends State<FinalScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
                                     children: [
-                                      Expanded(
-                                        child: Padding(
-                                          padding: ProjectPaddingCore()
-                                              .paddingAllLow,
-                                          child: InkWell(
-                                            highlightColor:
-                                                Colors.blue.withOpacity(0.3),
-                                            splashColor:
-                                                Colors.yellow.withOpacity(0.8),
-                                            onTap: () {
-                                              showDialog<void>(
-                                                  context: context,
-                                                  builder:
-                                                      (BuildContext context) {
-                                                    return AlertDialog(
-                                                      shape: RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(20),
-                                                          side:
-                                                              const BorderSide(
-                                                                  color: Colors
-                                                                      .blueGrey,
-                                                                  width: 2)),
-                                                      alignment:
-                                                          Alignment.center,
-                                                      content: ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(20),
-                                                        child: SizedBox(
-                                                          height: 200,
-                                                          width: 400,
-                                                          child: StreamBuilder<
-                                                                  bool>(
-                                                              stream:
-                                                                  streamController
-                                                                      .stream,
-                                                              builder: (context,
-                                                                  snapshot) {
-                                                                return Center(
+                                      StreamBuilder<Object>(
+                                          stream: streamControllerStop.stream,
+                                          builder: (context, snapshot) {
+                                            switch (snapshot.data) {
+                                              case true:
+                                                return Expanded(
+                                                  child: Padding(
+                                                    padding:
+                                                        ProjectPaddingCore()
+                                                            .paddingAllLow,
+                                                    child: InkWell(
+                                                      highlightColor: Colors
+                                                          .blue
+                                                          .withOpacity(0.3),
+                                                      splashColor: Colors.yellow
+                                                          .withOpacity(0.8),
+                                                      onTap: () {
+                                                        showDialog<void>(
+                                                            context: context,
+                                                            builder:
+                                                                (BuildContext
+                                                                    context) {
+                                                              return AlertDialog(
+                                                                shape: RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            20),
+                                                                    side: const BorderSide(
+                                                                        color: Colors
+                                                                            .blueGrey,
+                                                                        width:
+                                                                            2)),
+                                                                alignment:
+                                                                    Alignment
+                                                                        .center,
+                                                                content:
+                                                                    ClipRRect(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              20),
                                                                   child:
-                                                                      Container(
-                                                                    alignment:
-                                                                        Alignment
-                                                                            .center,
-                                                                    width: 250,
-                                                                    child:
-                                                                        Column(
-                                                                      mainAxisAlignment:
-                                                                          MainAxisAlignment
-                                                                              .spaceAround,
-                                                                      children: [
-                                                                        Row(
-                                                                          children: [
-                                                                            Expanded(
-                                                                              child: Container(
-                                                                                alignment: Alignment.center,
-                                                                                padding: const EdgeInsets.all(5),
-                                                                                decoration: BoxDecoration(
-                                                                                  borderRadius: BorderRadius.circular(20),
-                                                                                  border: Border.all(
-                                                                                    color: Colors.blueGrey,
-                                                                                    width: 2,
+                                                                      SizedBox(
+                                                                    height: 200,
+                                                                    width: 400,
+                                                                    child: StreamBuilder<
+                                                                            bool>(
+                                                                        stream: streamController
+                                                                            .stream,
+                                                                        builder:
+                                                                            (context,
+                                                                                snapshot) {
+                                                                          return Center(
+                                                                            child:
+                                                                                Container(
+                                                                              alignment: Alignment.center,
+                                                                              width: 250,
+                                                                              child: Column(
+                                                                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                                                children: [
+                                                                                  Row(
+                                                                                    children: [
+                                                                                      Expanded(
+                                                                                        child: SizedBox(
+                                                                                          height: CustomSize.height * 0.08,
+                                                                                          child: RawMaterialButton(
+                                                                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                                                                            fillColor: Colors.red,
+                                                                                            onPressed: () {
+                                                                                              streamControllerStop.add(false);
+                                                                                              Navigator.pop(context);
+                                                                                              Provider.of<CheckStateProvider>(context, listen: false).checkStateFun();
+                                                                                            },
+                                                                                            child: const Text("Devam Et"),
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                    ],
                                                                                   ),
-                                                                                ),
-                                                                                child: DropdownButton(
-                                                                                  underline: Container(),
-                                                                                  isExpanded: false,
-                                                                                  value: selectedValue,
-                                                                                  items: stopReasons.map((e) {
-                                                                                    return DropdownMenuItem(
-                                                                                      child: Text(e.stopCode.toString() + " - " + e.stopMessage),
-                                                                                      value: e.stopCode,
-                                                                                    );
-                                                                                  }).toList(),
-                                                                                  onChanged: (int? value) {
-                                                                                    // This is called when the user selects an item.
-                                                                                    selectedValue = value!;
-                                                                                    streamController.add(true);
-                                                                                  },
-                                                                                ),
+                                                                                ],
                                                                               ),
                                                                             ),
-                                                                          ],
-                                                                        ),
-                                                                        Row(
-                                                                          children: [
-                                                                            Expanded(
-                                                                              child: SizedBox(
-                                                                                height: CustomSize.height * 0.08,
-                                                                                child: RawMaterialButton(
-                                                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                                                                  fillColor: Colors.red,
-                                                                                  onPressed: () {},
-                                                                                  child: const Text("Duruş Bildir"),
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      ],
-                                                                    ),
+                                                                          );
+                                                                        }),
                                                                   ),
-                                                                );
-                                                              }),
+                                                                ),
+                                                              );
+                                                            });
+                                                      },
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                      child: Ink(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius: Constants
+                                                              .cardBorderRadius,
+                                                          color: Colors.white,
+                                                        ),
+                                                        child: Center(
+                                                          child: Text(
+                                                            "Devam Et",
+                                                            style:
+                                                                finalScreenTextStyle(),
+                                                          ),
                                                         ),
                                                       ),
-                                                    );
-                                                  });
-                                            },
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            child: Ink(
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    Constants.cardBorderRadius,
-                                                color: Colors.white,
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  "Duruş Bildir",
-                                                  style: finalScreenTextStyle(),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              case false:
+                                                return Expanded(
+                                                  child: Padding(
+                                                    padding:
+                                                        ProjectPaddingCore()
+                                                            .paddingAllLow,
+                                                    child: InkWell(
+                                                      highlightColor: Colors
+                                                          .blue
+                                                          .withOpacity(0.3),
+                                                      splashColor: Colors.yellow
+                                                          .withOpacity(0.8),
+                                                      onTap: () {
+                                                        showDialog<void>(
+                                                            context: context,
+                                                            builder:
+                                                                (BuildContext
+                                                                    context) {
+                                                              return AlertDialog(
+                                                                shape: RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            20),
+                                                                    side: const BorderSide(
+                                                                        color: Colors
+                                                                            .blueGrey,
+                                                                        width:
+                                                                            2)),
+                                                                alignment:
+                                                                    Alignment
+                                                                        .center,
+                                                                content:
+                                                                    ClipRRect(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              20),
+                                                                  child:
+                                                                      SizedBox(
+                                                                    height: 200,
+                                                                    width: 400,
+                                                                    child: StreamBuilder<
+                                                                            bool>(
+                                                                        stream: streamController
+                                                                            .stream,
+                                                                        builder:
+                                                                            (context,
+                                                                                snapshot) {
+                                                                          return Center(
+                                                                            child:
+                                                                                Container(
+                                                                              alignment: Alignment.center,
+                                                                              width: 250,
+                                                                              child: Column(
+                                                                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                                                children: [
+                                                                                  Row(
+                                                                                    children: [
+                                                                                      Expanded(
+                                                                                        child: Container(
+                                                                                          alignment: Alignment.center,
+                                                                                          padding: const EdgeInsets.all(5),
+                                                                                          decoration: BoxDecoration(
+                                                                                            borderRadius: BorderRadius.circular(20),
+                                                                                            border: Border.all(
+                                                                                              color: Colors.blueGrey,
+                                                                                              width: 2,
+                                                                                            ),
+                                                                                          ),
+                                                                                          child: DropdownButton(
+                                                                                            underline: Container(),
+                                                                                            isExpanded: false,
+                                                                                            value: selectedValue,
+                                                                                            items: stopReasons.map((e) {
+                                                                                              return DropdownMenuItem(
+                                                                                                child: Text(e.stopCode.toString() + " - " + e.stopMessage),
+                                                                                                value: e.stopCode,
+                                                                                              );
+                                                                                            }).toList(),
+                                                                                            onChanged: (int? value) {
+                                                                                              // This is called when the user selects an item.
+                                                                                              selectedValue = value!;
+                                                                                              streamController.add(true);
+                                                                                            },
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                  Row(
+                                                                                    children: [
+                                                                                      Expanded(
+                                                                                        child: SizedBox(
+                                                                                          height: CustomSize.height * 0.08,
+                                                                                          child: RawMaterialButton(
+                                                                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                                                                            fillColor: Colors.red,
+                                                                                            onPressed: () {
+                                                                                              streamControllerStop.add(true);
+                                                                                              Navigator.pop(context);
+                                                                                              Provider.of<CheckStateProvider>(context, listen: false).checkStateFun();
+                                                                                            },
+                                                                                            child: const Text("Duruş Bildir"),
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                            ),
+                                                                          );
+                                                                        }),
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            });
+                                                      },
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                      child: Ink(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius: Constants
+                                                              .cardBorderRadius,
+                                                          color: Colors.white,
+                                                        ),
+                                                        child: Center(
+                                                          child: Text(
+                                                            "Duruş Bildir",
+                                                            style:
+                                                                finalScreenTextStyle(),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+
+                                              default:
+                                                return Container(
+                                                  child: const Text("data"),
+                                                );
+                                            }
+                                          }),
                                       Expanded(
                                         child: Padding(
                                           padding: ProjectPaddingCore()

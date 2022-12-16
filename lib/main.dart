@@ -73,7 +73,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => FinalProvider()),
+        ChangeNotifierProvider(create: (context) => CheckStateProvider()),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',
