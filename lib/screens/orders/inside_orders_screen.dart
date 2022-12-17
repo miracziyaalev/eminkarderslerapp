@@ -6,10 +6,12 @@ import 'package:eminkardeslerapp/order/model/cycle_model.dart';
 import 'package:eminkardeslerapp/order/model/inside_orders_model.dart';
 import 'package:eminkardeslerapp/order/model/machine_model.dart';
 import 'package:eminkardeslerapp/order/model/order_materials_model.dart';
+import 'package:eminkardeslerapp/order/services/qualityServices/qualityServices.dart';
 import 'package:eminkardeslerapp/order/services/workOrdersPersonState/add_person_to_ie/add_personal_IE.dart';
 import 'package:eminkardeslerapp/order/services/cycle_service.dart';
 import 'package:eminkardeslerapp/order/services/inside_orders_service.dart';
 import 'package:eminkardeslerapp/order/services/materials_service.dart';
+import 'package:eminkardeslerapp/screens/operationPage/widgets/components/loading.dart';
 import 'package:eminkardeslerapp/screens/orders/showModalOrders.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -140,7 +142,12 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
           builder: (context, snapshot) {
             switch (snapshot.data) {
               case STATE.loadingScreen:
-                return const Center(child: CircularProgressIndicator());
+                return const Center(
+                    child: CustomCircularIndicator(
+                  currentDotColor: Color.fromARGB(255, 109, 8, 1),
+                  defaultDotColor: Colors.blueGrey,
+                  numDots: 10,
+                ));
               case STATE.loadedScreen:
                 return SizedBox(
                   child: Column(
@@ -479,35 +486,73 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                                                                             context: context,
                                                                                             title: "Operasyon baslasın mı ?",
                                                                                             btnOkOnPress: () async {
-                                                                                              await AddPersonalIE.addPersonnelIE(selectedValue, model.evrakno, (index + 1) * 10, 11553).then((value) {
-                                                                                                AwesomeDialog(
-                                                                                                  width: CustomSize.width * 0.6,
-                                                                                                  context: context,
-                                                                                                  body: Text(value ?? "Unknown"),
-                                                                                                  btnOkOnPress: () {
-                                                                                                    Navigator.push(
-                                                                                                        context,
-                                                                                                        MaterialPageRoute(
-                                                                                                          builder: (_) => const Home(
-                                                                                                            screenValue: 1,
-                                                                                                          ),
-                                                                                                        ));
-                                                                                                  },
-                                                                                                  btnOkText: "Tamam",
-                                                                                                ).show();
-                                                                                                Future.delayed(const Duration(seconds: 4), () {
-                                                                                                  Navigator.push(
-                                                                                                      context,
-                                                                                                      MaterialPageRoute(
-                                                                                                        builder: (_) => Home(
-                                                                                                          allModels: model,
-                                                                                                          getCycleModel: getCycleModel[0],
-                                                                                                          chosenWorkBench: selectedValue,
-                                                                                                          insideOrders: insideOrders[currentInsideOrderIndex],
-                                                                                                          screenValue: 2,
-                                                                                                        ),
-                                                                                                      ));
-                                                                                                });
+                                                                                              await AddPersonalIE.addPersonnelIE(selectedValue, model.evrakno, (index + 1) * 10, 11553).then((value) async {
+                                                                                                if (value != null && value["status"] == 200) {
+                                                                                                  await QualityServices.isQualityCaseStarted(model.evrakno, model.ad).then(
+                                                                                                    (v) async {
+                                                                                                      Map<String, dynamic> body = {
+                                                                                                        "evrakNo": model.evrakno,
+                                                                                                        "kod": selectedValue,
+                                                                                                        "mpsNo": model.evrakno,
+                                                                                                        "d7IslemKodu": "U",
+                                                                                                        "mamulcode": model.mamulstokkodu.trimRight(),
+                                                                                                        "receteCode": model.mamulstokkodu.trimRight(),
+                                                                                                        "jobNo": "İE.22.036100001", //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
+                                                                                                        "operator_1": Constants.personelCode,
+
+                                                                                                        "cycleTime": getCycleModel[0].bomrecKaynak0Bv,
+                                                                                                        "cycleTimeCins": getCycleModel[0].bomrecKaynak0Bu.trimRight(),
+                                                                                                      };
+                                                                                                      await QualityServices.sendProduceInfo(body).then((_) async {
+                                                                                                        AwesomeDialog(
+                                                                                                                width: CustomSize.width * 0.6,
+                                                                                                                dismissOnTouchOutside: false,
+                                                                                                                dismissOnBackKeyPress: false,
+                                                                                                                context: context,
+                                                                                                                body: Text(value["message"] ?? "Unknown"),
+                                                                                                                btnOkOnPress: () {
+                                                                                                                  Navigator.push(
+                                                                                                                      context,
+                                                                                                                      MaterialPageRoute(
+                                                                                                                        builder: (_) => Home(
+                                                                                                                          allModels: model,
+                                                                                                                          getCycleModel: getCycleModel[0],
+                                                                                                                          chosenWorkBench: selectedValue,
+                                                                                                                          insideOrders: insideOrders[currentInsideOrderIndex],
+                                                                                                                          screenValue: 2,
+                                                                                                                        ),
+                                                                                                                      ));
+                                                                                                                },
+                                                                                                                btnOkText: "Tamam")
+                                                                                                            .show();
+                                                                                                      });
+
+                                                                                                      //TODO: v else handle the null return case
+                                                                                                    },
+                                                                                                  );
+                                                                                                } else if (value != null && value["status"] == 400) {
+                                                                                                  AwesomeDialog(
+                                                                                                          width: CustomSize.width * 0.6,
+                                                                                                          dismissOnTouchOutside: false,
+                                                                                                          dismissOnBackKeyPress: false,
+                                                                                                          context: context,
+                                                                                                          body: Text(value["message"] ?? "Unknown"),
+                                                                                                          btnOkOnPress: () {
+                                                                                                            Navigator.push(
+                                                                                                                context,
+                                                                                                                MaterialPageRoute(
+                                                                                                                  builder: (_) => const Home(
+                                                                                                                    screenValue: 1,
+                                                                                                                  ),
+                                                                                                                ));
+                                                                                                          },
+                                                                                                          btnOkText: "Tamam")
+                                                                                                      .show();
+                                                                                                } else {
+                                                                                                  //TODO: If request return null connetion etc.
+                                                                                                }
+
+                                                                                                Future.delayed(const Duration(seconds: 4), () {});
                                                                                               });
                                                                                             },
                                                                                             btnOkText: "Evet",

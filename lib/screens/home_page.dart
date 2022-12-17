@@ -6,6 +6,8 @@ import 'package:eminkardeslerapp/order/model/orders_model.dart';
 import 'package:eminkardeslerapp/screens/LoginScreen/LoginScreenView/final_login_screen.dart';
 import 'package:eminkardeslerapp/screens/final_machine.dart';
 import 'package:eminkardeslerapp/screens/operationPage/views/OperationStateCheckerView.dart';
+import 'package:eminkardeslerapp/screens/operationPage/widgets/components/dialogWidget.dart';
+import 'package:eminkardeslerapp/screens/operationPage/workOrdersPage/views/workOrdersStateCheckerView.dart';
 import 'package:eminkardeslerapp/screens/orders/work_orders_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -78,54 +80,56 @@ class _HomeState extends State<Home> {
           const FinalMachineState()
         ]),
         drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
+          child: Stack(
             children: [
-              DrawerHeader(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/image.jpg'),
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(child: Column()),
               Column(
                 children: [
+                  DrawerHeader(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/image.jpg'),
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                  ),
                   Center(child: Text(Constants.userName)),
                   const SizedBox(
                     height: 100,
                   ),
-                  SizedBox(
-                    height: 450,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: InkWell(
-                              onTap: (() async {
-                                SharedPreferences prefs =
-                                    await SharedPreferences.getInstance();
-                                prefs.clear();
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const FinalLoginScreen()),
-                                );
-                              }),
-                              child: const Icon(Icons.power_settings_new_sharp,
-                                  size: 53)),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
-              )
+              ),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: InkWell(
+                      onTap: (() async {
+                        SharedPreferences prefsS =
+                            await SharedPreferences.getInstance();
+                        Constants.isHasIE = prefsS.getBool('isHasIE');
+                        if (!Constants.isHasIE!) {
+                          SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                          prefs.clear();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const FinalLoginScreen()),
+                          );
+                        } else {
+                          showDialog(
+                              context: context,
+                              builder: (context) => DialogFb1(
+                                    onPressed: (() {}),
+                                  ));
+                        }
+                      }),
+                      child:
+                          const Icon(Icons.power_settings_new_sharp, size: 53)),
+                ),
+              ),
             ],
           ),
         ),

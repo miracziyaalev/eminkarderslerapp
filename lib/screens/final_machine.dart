@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:eminkardeslerapp/order/model/machine_model.dart';
+import 'package:eminkardeslerapp/screens/operationPage/widgets/components/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/subjects.dart';
 
@@ -65,7 +66,12 @@ class _FinalMachineStateState extends State<FinalMachineState> {
         builder: (context, snapshot) {
           switch (snapshot.data) {
             case STATE.loadingScreen:
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                  child: CustomCircularIndicator(
+                currentDotColor: Colors.red,
+                defaultDotColor: Colors.blueGrey,
+                numDots: 10,
+              ));
             case STATE.loadedScreen:
               return GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

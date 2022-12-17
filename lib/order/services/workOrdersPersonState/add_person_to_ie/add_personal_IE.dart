@@ -23,13 +23,21 @@ class AddPersonalIE {
 
       if (response.statusCode == 200) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('isHasIE', true);
 
-        return response.body;
+        await prefs.setBool('isHasIE', true);
+        Map<String, dynamic> result = {
+          "status": response.statusCode,
+          "message": response.body
+        };
+        return result;
       } else if (response.statusCode == 400) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isHasIE', false);
-        return response.body;
+          Map<String, dynamic> result = {
+          "status": response.statusCode,
+          "message": response.body
+        };
+        return result;
       } else {
         return null;
       }

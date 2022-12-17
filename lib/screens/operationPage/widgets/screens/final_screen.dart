@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:eminkardeslerapp/core/constants.dart';
@@ -6,6 +7,7 @@ import 'package:eminkardeslerapp/core/core_padding.dart';
 import 'package:eminkardeslerapp/order/model/cycle_model.dart';
 import 'package:eminkardeslerapp/order/model/inside_orders_model.dart';
 import 'package:eminkardeslerapp/order/model/orders_model.dart';
+import 'package:eminkardeslerapp/order/services/qualityServices/qualityServices.dart';
 import 'package:eminkardeslerapp/order/services/workOrdersPersonState/endOfTheDay.dart';
 import 'package:eminkardeslerapp/order/services/workOrdersPersonState/endOfTheWorkOrder.dart';
 import 'package:eminkardeslerapp/providers/final_screen_providers.dart';
@@ -60,15 +62,6 @@ class _FinalScreenState extends State<FinalScreen> {
   late StreamController<bool> streamControllerStop;
   TextEditingController textController = TextEditingController();
   TextEditingController textController2 = TextEditingController();
-  bool isStop = false;
-
-  Future<bool> isStopOrder() async {
-    if (isStop == true) {
-      return true;
-    } else {
-      return false;
-    }
-  }
 
   Future<bool> hasConnection() async {
     bool hasInternet = false;
@@ -89,18 +82,25 @@ class _FinalScreenState extends State<FinalScreen> {
 
   @override
   void initState() {
-    //  constValues().then((value) => getConsValues());
-    isStopOrder().then((value) {
-      if (value) {
-        streamControllerStop.add(true);
-      } else {
-        streamControllerStop.add(false);
-      }
-    });
-
     streamController = BehaviorSubject<bool>();
     streamControllerStop = BehaviorSubject<bool>();
+    //  constValues().then((value) => getConsValues());
+
     super.initState();
+  }
+
+  Future<void> saveRequiredParameters(bool checkState) async {
+    Map<String, dynamic> currentValues = {
+      "checkState": checkState,
+      "mpsNo": allModels?.evrakno ?? "",
+      "musteriAd": allModels?.musteriAd ?? "",
+      "mamulAd": allModels?.ad ?? "",
+    };
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("currentValues", jsonEncode(currentValues));
+    var x = prefs.getString("currentValues");
+    var json = jsonDecode(x ?? "");
+    print(json["checkState"]);
   }
 
   @override
@@ -117,6 +117,8 @@ class _FinalScreenState extends State<FinalScreen> {
   Widget build(BuildContext context) {
     final checkStateProvider =
         Provider.of<CheckStateProvider>(context).checkState;
+
+    streamControllerStop.add(checkStateProvider);
 
     int flexValue_ = 3;
     CustomSize.height = MediaQuery.of(context).size.height;
@@ -273,7 +275,7 @@ class _FinalScreenState extends State<FinalScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
                                     children: [
-                                      StreamBuilder<Object>(
+                                      StreamBuilder<bool>(
                                           stream: streamControllerStop.stream,
                                           builder: (context, snapshot) {
                                             switch (snapshot.data) {
@@ -341,7 +343,22 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                                           child: RawMaterialButton(
                                                                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                                                                                             fillColor: Colors.red,
-                                                                                            onPressed: () {
+                                                                                            onPressed: () async {
+                                                                                              Map<String, dynamic> body = {
+                                                                                                // "evrakNo": allModels?.evrakno,
+                                                                                                // "kod": chosenWorkBench,
+                                                                                                "mpsNo": allModels?.evrakno,
+                                                                                                "d7IslemKodu": stopReasons.firstWhere((element) => element.stopCode == selectedValue).stopValue,
+                                                                                                // "stopReason": selectedValue.toString().padLeft(2, "0"),
+                                                                                                // "mamulcode": allModels?.mamulstokkodu.trimRight(),
+                                                                                                // "receteCode": allModels?.mamulstokkodu.trimRight(),
+                                                                                                "jobNo": "İE.22.036100001", //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
+                                                                                                // "operator_1": Constants.personelCode,
+
+                                                                                                // "cycleTime": getCycleModel?.bomrecKaynak0Bv,
+                                                                                                // "cycleTimeCins": getCycleModel?.bomrecKaynak0Bu.trimRight(),
+                                                                                              };
+                                                                                              await QualityServices.continueProcess(body);
                                                                                               streamControllerStop.add(false);
                                                                                               Navigator.pop(context);
                                                                                               Provider.of<CheckStateProvider>(context, listen: false).checkStateFun();
@@ -480,7 +497,23 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                                           child: RawMaterialButton(
                                                                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                                                                                             fillColor: Colors.red,
-                                                                                            onPressed: () {
+                                                                                            onPressed: () async {
+                                                                                              Map<String, dynamic> body = {
+                                                                                                "evrakNo": allModels?.evrakno,
+                                                                                                "kod": chosenWorkBench,
+                                                                                                "mpsNo": allModels?.evrakno,
+                                                                                                "d7IslemKodu": stopReasons.firstWhere((element) => element.stopCode == selectedValue).stopValue,
+                                                                                                "stopReason": selectedValue.toString().padLeft(2, "0"),
+                                                                                                "mamulcode": allModels?.mamulstokkodu.trimRight(),
+                                                                                                "receteCode": allModels?.mamulstokkodu.trimRight(),
+                                                                                                "jobNo": "İE.22.036100001", //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
+                                                                                                "operator_1": Constants.personelCode,
+
+                                                                                                // "cycleTime": getCycleModel?.bomrecKaynak0Bv,
+                                                                                                // "cycleTimeCins": getCycleModel?.bomrecKaynak0Bu.trimRight(),
+                                                                                              };
+                                                                                              await QualityServices.stopReasonInfo(body);
+
                                                                                               streamControllerStop.add(true);
                                                                                               Navigator.pop(context);
                                                                                               Provider.of<CheckStateProvider>(context, listen: false).checkStateFun();
@@ -615,43 +648,57 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                                 Colors.red,
                                                                             onPressed:
                                                                                 () async {
-                                                                              hasConnection().then((value) async {
+                                                                              FocusScope.of(context).unfocus();
+
+                                                                              await hasConnection().then((value) async {
                                                                                 if (value == true) {
+                                                                                  
                                                                                   await EndOfTheDay.endOfTheDay().then(
                                                                                     (value) {
-                                                                                      if (value != null && value.isNotEmpty) {
+                                                                                      if (value != null && value["status"] == 200) {
                                                                                         AwesomeDialog(
                                                                                                 width: CustomSize.width * 0.6,
                                                                                                 context: context,
                                                                                                 title: "Gün sonu bildirmeye emin misiniz?",
                                                                                                 btnOkOnPress: () async {
-                                                                                                  await EndOfTheDay.endOfTheDay().then((value) {
-                                                                                                    AwesomeDialog(
-                                                                                                      width: CustomSize.width * 0.6,
-                                                                                                      context: context,
-                                                                                                      body: Text(value ?? "Unknown"),
-                                                                                                      btnOkOnPress: () {},
-                                                                                                      btnOkText: "Tamam",
-                                                                                                    ).show();
+                                                                                                  Map<String, dynamic> body = {
+                                                                                                    // "evrakNo": allModels?.evrakno,
+                                                                                                    // "kod": chosenWorkBench,
+                                                                                                    "mpsNo": allModels?.evrakno,
+                                                                                                    "d7IslemKodu": "U",
+                                                                                                    // "mamulcode": allModels?.mamulstokkodu.trimRight(),
+                                                                                                    // "receteCode": allModels?.mamulstokkodu.trimRight(),
+                                                                                                    "jobNo": "İE.22.036100001", //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
+                                                                                                    // "operator_1": Constants.personelCode,
+
+                                                                                                    // "cycleTime": getCycleModel?.bomrecKaynak0Bv,
+                                                                                                    // "cycleTimeCins": getCycleModel?.bomrecKaynak0Bu.trimRight(),
+                                                                                                    "d7Aksiyon": "C",
+                                                                                                    "tm_miktar": textController.text,
+                                                                                                    "fire_miktar": textController2.text,
+                                                                                                    "operasyonTekrarSayisi": textController.text,
+                                                                                                  };
+                                                                                                  await QualityServices.endOfDayQuality(body).then((result) async {
+                                                                                                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                                                                                                    await prefs.setBool('isHasIE', false);
+                                                                                                    Navigator.push(
+                                                                                                        context,
+                                                                                                        MaterialPageRoute(
+                                                                                                          builder: (_) => const Home(screenValue: 0),
+                                                                                                        ));
                                                                                                   });
                                                                                                 },
                                                                                                 btnOkText: "Evet",
                                                                                                 btnCancelOnPress: () {},
                                                                                                 btnCancelText: "Hayır")
                                                                                             .show();
+                                                                                      } else if (value != null && value["status"] == 400) {
+                                                                                        //TODO: This screen will never trigger
+                                                                                      } else {
+                                                                                        //TODO: handle null return
                                                                                       }
                                                                                     },
                                                                                   );
-
-                                                                                  SharedPreferences prefs = await SharedPreferences.getInstance();
-                                                                                  await prefs.setBool('isHasIE', false);
-                                                                                  Future.delayed(const Duration(seconds: 4), () {
-                                                                                    Navigator.push(
-                                                                                        context,
-                                                                                        MaterialPageRoute(
-                                                                                          builder: (_) => const Home(screenValue: 0),
-                                                                                        ));
-                                                                                  });
                                                                                 } else {}
                                                                               });
                                                                             },
@@ -773,43 +820,58 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                                 Colors.red,
                                                                             onPressed:
                                                                                 () async {
-                                                                              hasConnection().then((value) async {
+                                                                              FocusScope.of(context).unfocus();
+
+                                                                              await hasConnection().then((value) async {
                                                                                 if (value == true) {
                                                                                   await EndOfTheWorkOrder.endOfTheWorkOrder().then(
                                                                                     (value) {
-                                                                                      if (value != null && value.isNotEmpty) {
+                                                                                      if (value != null && value["status"] == 200) {
                                                                                         AwesomeDialog(
                                                                                                 width: CustomSize.width * 0.6,
                                                                                                 context: context,
-                                                                                                title: "İş emrinin bittiğinden eminiz misiniz?",
+                                                                                                title: "İş emrini bitirmeye emin misiniz?",
                                                                                                 btnOkOnPress: () async {
-                                                                                                  await EndOfTheWorkOrder.endOfTheWorkOrder().then((value) {
-                                                                                                    AwesomeDialog(
-                                                                                                      width: CustomSize.width * 0.6,
-                                                                                                      context: context,
-                                                                                                      body: Text(value ?? "Unknown"),
-                                                                                                      btnOkOnPress: () {},
-                                                                                                      btnOkText: "Tamam",
-                                                                                                    ).show();
+                                                                                                  Map<String, dynamic> body = {
+                                                                                                    // "evrakNo": allModels?.evrakno,
+                                                                                                    // "kod": chosenWorkBench,
+                                                                                                    "mpsNo": allModels?.evrakno,
+                                                                                                    "d7IslemKodu": "U",
+                                                                                                    // "mamulcode": allModels?.mamulstokkodu.trimRight(),
+                                                                                                    // "receteCode": allModels?.mamulstokkodu.trimRight(),
+                                                                                                    "jobNo": "İE.22.036100001", //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
+                                                                                                    // "operator_1": Constants.personelCode,
+
+                                                                                                    // "cycleTime": getCycleModel?.bomrecKaynak0Bv,
+                                                                                                    // "cycleTimeCins": getCycleModel?.bomrecKaynak0Bu.trimRight(),
+                                                                                                    "d7Aksiyon": "E",
+                                                                                                    "tm_miktar": textController.text,
+                                                                                                    "fire_miktar": textController2.text,
+                                                                                                    "operasyonTekrarSayisi": textController.text,
+                                                                                                  };
+
+                                                                                                  await QualityServices.endOfWorkQuality(body).then((result) async {
+                                                                                                    //TODO: write http request and handle the response
+                                                                                                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                                                                                                    await prefs.setBool('isHasIE', false);
+                                                                                                    Navigator.push(
+                                                                                                        context,
+                                                                                                        MaterialPageRoute(
+                                                                                                          builder: (_) => const Home(screenValue: 0),
+                                                                                                        ));
                                                                                                   });
                                                                                                 },
                                                                                                 btnOkText: "Evet",
                                                                                                 btnCancelOnPress: () {},
                                                                                                 btnCancelText: "Hayır")
                                                                                             .show();
+                                                                                      } else if (value != null && value["status"] == 400) {
+                                                                                        //TODO: This screen will never trigger
+                                                                                      } else {
+                                                                                        //TODO: handle null return
                                                                                       }
                                                                                     },
                                                                                   );
-
-                                                                                  SharedPreferences prefs = await SharedPreferences.getInstance();
-                                                                                  await prefs.setBool('isHasIE', false);
-                                                                                  Future.delayed(const Duration(seconds: 4), () {
-                                                                                    Navigator.push(
-                                                                                        context,
-                                                                                        MaterialPageRoute(
-                                                                                          builder: (_) => const Home(screenValue: 0),
-                                                                                        ));
-                                                                                  });
                                                                                 } else {}
                                                                               });
                                                                             },
@@ -872,7 +934,7 @@ class _FinalScreenState extends State<FinalScreen> {
                         child: customContainer_(
                           customHeight: CustomSize.height,
                           customWidth: CustomSize.width,
-                          denemeMMPS: Constants.workOrderIE,
+                          denemeMMPS: allModels?.evrakno ?? '',
                         ),
                       ),
                       Expanded(
@@ -900,7 +962,7 @@ class _FinalScreenState extends State<FinalScreen> {
                         child: customContainer_(
                           customHeight: CustomSize.height,
                           customWidth: CustomSize.width,
-                          denemeMMPS: "Miraç Ziya Alev",
+                          denemeMMPS: Constants.personelName,
                         ),
                       )
                     ],
@@ -949,6 +1011,7 @@ class customContainer_ extends StatelessWidget {
             child: Text(
           denemeMMPS,
           style: const TextStyle(fontSize: 20),
+          textAlign: TextAlign.center,
         )),
       ),
     );

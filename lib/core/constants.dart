@@ -22,6 +22,7 @@ class Constants {
   static bool? isHasIE;
   static GetUserInfoModel? testUser;
   static var deneme;
+  static bool checkState = false;
 
   static BorderRadius cardBorderRadius = BorderRadius.circular(20);
 
@@ -30,6 +31,9 @@ class Constants {
   static String workOrderIE = "";
   static String workOrderName = "";
   static String workOrderCompany = "";
+
+  static String personelCode = "";
+  static String personelName = "";
 }
 
 class CustomSize {

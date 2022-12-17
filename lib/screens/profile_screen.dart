@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:eminkardeslerapp/core/core_padding.dart';
+import 'package:eminkardeslerapp/screens/operationPage/widgets/components/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/subjects.dart';
 
+import '../core/constants.dart';
 import '../login/model/get_user_model.dart';
 import '../login/service/user_model_service.dart';
 
@@ -38,6 +40,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     UserInfoService.fetchUserInfo().then((value) async {
       if (value != null) {
         singleUserModel = value;
+        Constants.personelCode = singleUserModel.code;
+        Constants.personelName = singleUserModel.name;
 
         if (!streamController.isClosed) {
           streamController.add(STATE.loadedScreen);
@@ -58,61 +62,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           builder: (context, snapshot) {
             switch (snapshot.data) {
               case STATE.loadingScreen:
-                return Padding(
-                  padding: ProjectPaddingCore().paddingAllHigh,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.grey,
-                    ),
-                    height: MediaQuery.of(context).size.width * 0.3,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const CircularProgressIndicator(),
-                        CardFb2(
-                            text: 'Profil Fotoğrafı',
-                            subtitle: 'Foto',
-                            onPressed: () {}),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CardFb2(
-                                text: '',
-                                subtitle: 'Personel Kodu',
-                                onPressed: () {}),
-                            CardFb2(
-                                text: '', subtitle: 'İsim', onPressed: () {}),
-                            CardFb2(
-                                text: '', subtitle: 'Adres', onPressed: () {}),
-                            CardFb2(
-                                text: '',
-                                subtitle: 'Departman',
-                                onPressed: () {}),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CardFb2(
-                                text: '',
-                                subtitle: 'Pozisyon',
-                                onPressed: () {}),
-                            CardFb2(
-                                text: '',
-                                subtitle: 'Kullanıcı adı',
-                                onPressed: () {}),
-                            CardFb2(
-                                text: '', subtitle: 'E-mail', onPressed: () {}),
-                            CardFb2(
-                                text: '05363603060',
-                                subtitle: 'Telefon Numarası',
-                                onPressed: () {}),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                return const Center(
+                  child: CustomCircularIndicator(
+                      currentDotColor: Color.fromARGB(255, 105, 15, 8),
+                      defaultDotColor: Colors.blueGrey,
+                      numDots: 10),
                 );
               case STATE.loadedScreen:
                 return Padding(
@@ -120,7 +74,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
-                      color: Colors.grey,
                     ),
                     height: MediaQuery.of(context).size.width * 0.3,
                     child: Column(

@@ -13,7 +13,11 @@ class EndOfTheWorkOrder {
       );
 
       if (response.statusCode == 200 || response.statusCode == 400) {
-        return response.body;
+          Map<String, dynamic> result = {
+          "status": response.statusCode,
+          "message": response.body
+        };
+        return result;
       } else {
         return null;
       }
