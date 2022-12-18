@@ -7,7 +7,6 @@ import 'package:eminkardeslerapp/screens/LoginScreen/LoginScreenView/final_login
 import 'package:eminkardeslerapp/screens/final_machine.dart';
 import 'package:eminkardeslerapp/screens/operationPage/views/OperationStateCheckerView.dart';
 import 'package:eminkardeslerapp/screens/operationPage/widgets/components/dialogWidget.dart';
-import 'package:eminkardeslerapp/screens/operationPage/workOrdersPage/views/workOrdersStateCheckerView.dart';
 import 'package:eminkardeslerapp/screens/orders/work_orders_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,6 +34,11 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
+Future<void> getHasIE() async {
+  SharedPreferences prefsS = await SharedPreferences.getInstance();
+  Constants.isHasIE = prefsS.getBool('isHasIE');
+}
+
 class _HomeState extends State<Home> {
   GetInsideOrdersInfoModel? get insideOrders => widget.insideOrders;
   String? get chosenWorkBench => widget.chosenWorkBench;
@@ -43,6 +47,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    getHasIE();
     var customWidth = MediaQuery.of(context).size.width;
     var customHeight = MediaQuery.of(context).size.height;
 
@@ -94,10 +99,8 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                   ),
-                  Center(child: Text(Constants.userName)),
-                  const SizedBox(
-                    height: 100,
-                  ),
+                  Center(child: Text(Constants.personelName)),
+                  const SizedBox(height: 100),
                 ],
               ),
               Align(
@@ -106,9 +109,7 @@ class _HomeState extends State<Home> {
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
                       onTap: (() async {
-                        SharedPreferences prefsS =
-                            await SharedPreferences.getInstance();
-                        Constants.isHasIE = prefsS.getBool('isHasIE');
+                        await getHasIE();
                         if (!Constants.isHasIE!) {
                           SharedPreferences prefs =
                               await SharedPreferences.getInstance();

@@ -1,4 +1,8 @@
+import 'dart:async';
+
+import 'package:eminkardeslerapp/screens/operationPage/widgets/components/loading.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/subjects.dart';
 
 import '../../../core/constants.dart';
 import '../../../core/core_image.dart';
@@ -6,8 +10,8 @@ import '../../../login/service/login_service.dart';
 import '../../../product/language/language_items.dart';
 import '../../home_page.dart';
 
-class AccesWidget extends StatelessWidget {
-  const AccesWidget({
+class AccesWidget extends StatefulWidget {
+  AccesWidget({
     Key? key,
     required this.controllerEmail,
     required this.controllerPassword,
@@ -15,6 +19,19 @@ class AccesWidget extends StatelessWidget {
 
   final TextEditingController controllerEmail;
   final TextEditingController controllerPassword;
+
+  @override
+  State<AccesWidget> createState() => _AccesWidgetState();
+}
+
+class _AccesWidgetState extends State<AccesWidget> {
+  late StreamController<bool> streamController;
+  @override
+  void initState() {
+    streamController = BehaviorSubject<bool>();
+    streamController.add(false);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +43,9 @@ class AccesWidget extends StatelessWidget {
           backgroundColor: const Color.fromARGB(255, 198, 70, 27),
         ),
         onPressed: () async {
+          streamController.add(true);
           await LoginServices.fetchUserLogin(
-                  controllerEmail.text, controllerPassword.text)
+                  widget.controllerEmail.text, widget.controllerPassword.text)
               .then((value) {
             if (value != null && value) {
               Navigator.push(
@@ -38,17 +56,34 @@ class AccesWidget extends StatelessWidget {
                         )),
               );
             } else if (value != null && !value) {
+              streamController.add(false);
               const snackBar = SnackBar(
                 content: Text('Login failed'),
               );
 
               ScaffoldMessenger.of(context).showSnackBar(snackBar);
             } else {
+              streamController.add(false);
               print("data returned null");
             }
           });
         },
-        child: const Text("Giris Yap"),
+        child: StreamBuilder<Object>(
+            stream: streamController.stream,
+            builder: (context, snapshot) {
+              switch (snapshot.data) {
+                case false:
+                  return const Text("Giriş Yap");
+                case true:
+                  return CustomCircularIndicator(
+                      currentDotColor: Colors.white,
+                      defaultDotColor: Colors.blueGrey,
+                      numDots: 10);
+
+                default:
+                  return Text("defaultr");
+              }
+            }),
       ),
     );
   }

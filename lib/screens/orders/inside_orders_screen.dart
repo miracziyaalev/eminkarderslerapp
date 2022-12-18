@@ -12,7 +12,6 @@ import 'package:eminkardeslerapp/order/services/cycle_service.dart';
 import 'package:eminkardeslerapp/order/services/inside_orders_service.dart';
 import 'package:eminkardeslerapp/order/services/materials_service.dart';
 import 'package:eminkardeslerapp/screens/operationPage/widgets/components/loading.dart';
-import 'package:eminkardeslerapp/screens/orders/showModalOrders.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,6 +34,7 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
   late StreamController<STATE> streamController;
   late StreamController<bool> streamControllerModal;
   late StreamController<bool> streamControllerIsActive;
+  late StreamController<bool> streamControllerOnTapped;
 
   late List<GetInsideOrdersInfoModel> insideOrders;
   late List<GetOrdersMaterials> materials;
@@ -59,6 +59,7 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
     streamController = BehaviorSubject<STATE>();
     streamControllerModal = BehaviorSubject<bool>();
     streamControllerIsActive = BehaviorSubject<bool>();
+    streamControllerOnTapped = BehaviorSubject<bool>();
 
     isHasIEChecker().then((value) {
       if (value) {
@@ -67,6 +68,8 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
         streamControllerIsActive.add(false);
       }
     });
+
+    streamControllerOnTapped.add(false);
     super.initState();
   }
 
@@ -104,6 +107,7 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
     streamController.close();
     streamControllerModal.close();
     streamControllerIsActive.close();
+    streamControllerOnTapped.close();
     super.dispose();
   }
 
@@ -299,309 +303,329 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                         ),
                                         Expanded(
                                           flex: 2,
-                                          child: ModalBottomSheet(
-                                              onPressed: () async {
-                                            currentInsideOrderIndex = index;
-                                            await getMaterial(
-                                                insideOrders[index].evrakNo,
-                                                insideOrders[index].rSiraNo);
-                                            await GetMachineStateService
-                                                    .fetchMachineStatesFreeInfo()
-                                                .then((value) {
-                                              if (value != null &&
-                                                  value.isNotEmpty) {
-                                                getMachineStateModel = value;
-                                                selectedValue =
-                                                    value.first.workBenchCode;
-                                              }
-                                            });
-                                            await GetCycleTime.fetchCycleData(
-                                                    model.mamulstokkodu,
-                                                    item.rSiraNo)
-                                                .then(
-                                              (value) {
-                                                if (value != null &&
-                                                    value.isNotEmpty) {
-                                                  getCycleModel = value;
-                                                }
-                                              },
-                                            );
-                                            await showModalBottomSheet<void>(
-                                              context: context,
-                                              shape:
-                                                  const RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.vertical(
-                                                              top: Radius
-                                                                  .circular(
-                                                                      70))),
-                                              builder: (BuildContext context) {
-                                                return StreamBuilder<bool>(
-                                                    stream:
-                                                        streamControllerModal
-                                                            .stream,
-                                                    builder:
-                                                        (context, snapshot) {
-                                                      return SafeArea(
-                                                        child: Padding(
-                                                          padding:
-                                                              ProjectPaddingCore()
-                                                                  .paddingAllHigh,
-                                                          child: Column(
-                                                            children: [
-                                                              Expanded(
-                                                                flex: 2,
-                                                                child:
-                                                                    Container(
-                                                                  height: CustomSize
-                                                                          .height *
-                                                                      0.1,
-                                                                  width: CustomSize
-                                                                          .width *
-                                                                      0.55,
-                                                                  decoration: BoxDecoration(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              20),
-                                                                      color: Colors
-                                                                          .grey),
-                                                                  child: Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .spaceAround,
-                                                                    children: [
-                                                                      Expanded(
-                                                                          flex:
-                                                                              2,
-                                                                          child:
-                                                                              Container(
-                                                                            child:
-                                                                                Text("   Operasyon:${insideOrders[index].operasyonAd}"),
-                                                                          )),
-                                                                      Expanded(
-                                                                          flex:
-                                                                              1,
-                                                                          child:
-                                                                              Container(
-                                                                            child:
-                                                                                Text("Operasyon Sıra Numarası:${insideOrders[index].rSiraNo} "),
-                                                                          )),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              const Expanded(
-                                                                  child:
-                                                                      SizedBox(
-                                                                height: 10,
-                                                              )),
-                                                              Expanded(
-                                                                flex: 9,
-                                                                child: materials
-                                                                        .isNotEmpty
-                                                                    ? ListView.builder(
-                                                                        itemCount: materials.length,
-                                                                        itemBuilder: (BuildContext context, int index) {
-                                                                          var iter =
-                                                                              materials[index];
-                                                                          return Padding(
-                                                                            padding:
-                                                                                ProjectPaddingCore().paddingAllLow,
-                                                                            child:
-                                                                                Container(
-                                                                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(30), color: Colors.blueGrey),
-                                                                              height: CustomSize.height * 0.04,
-                                                                              child: Column(
-                                                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                                                children: [
-                                                                                  Row(
-                                                                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                                                                    children: [
-                                                                                      Expanded(flex: 1, child: Center(child: Text(iter.rKaynakkodu))),
-                                                                                      Expanded(flex: 2, child: Center(child: Text(iter.ad))),
-                                                                                      Expanded(flex: 1, child: Center(child: Text(iter.lotNumber))),
-                                                                                      Expanded(flex: 1, child: Center(child: Text(iter.rMiktar0.toString()))),
-                                                                                    ],
-                                                                                  ),
-                                                                                ],
+                                          child: StreamBuilder<bool>(
+                                              stream: streamControllerOnTapped
+                                                  .stream,
+                                              builder: (context, snapshot) {
+                                                switch (snapshot.data) {
+                                                  case false:
+                                                    return InkWell(
+                                                        child: Container(
+                                                            height: CustomSize
+                                                                    .height *
+                                                                0.5,
+                                                            width: CustomSize
+                                                                    .width *
+                                                                0.5,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          20),
+                                                              color: Colors
+                                                                      .blueGrey[
+                                                                  600],
+                                                            ),
+                                                            child: const Icon(
+                                                              Icons
+                                                                  .keyboard_double_arrow_down_outlined,
+                                                              size: 50,
+                                                            )),
+                                                        onTap: () async {
+                                                          streamControllerOnTapped
+                                                              .add(true);
+
+                                                          currentInsideOrderIndex =
+                                                              index;
+                                                          await getMaterial(
+                                                              insideOrders[
+                                                                      index]
+                                                                  .evrakNo,
+                                                              insideOrders[
+                                                                      index]
+                                                                  .rSiraNo);
+                                                          await GetMachineStateService
+                                                                  .fetchMachineStatesFreeInfo()
+                                                              .then((value) {
+                                                            if (value != null &&
+                                                                value
+                                                                    .isNotEmpty) {
+                                                              getMachineStateModel =
+                                                                  value;
+                                                              selectedValue = value
+                                                                  .first
+                                                                  .workBenchCode;
+                                                            }
+                                                          });
+                                                          await GetCycleTime
+                                                                  .fetchCycleData(
+                                                                      model
+                                                                          .mamulstokkodu,
+                                                                      item.rSiraNo)
+                                                              .then(
+                                                            (value) {
+                                                              if (value !=
+                                                                      null &&
+                                                                  value
+                                                                      .isNotEmpty) {
+                                                                getCycleModel =
+                                                                    value;
+                                                              }
+                                                            },
+                                                          );
+
+                                                          await showModalBottomSheet<
+                                                              void>(
+                                                            context: context,
+                                                            shape: const RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .vertical(
+                                                                            top:
+                                                                                Radius.circular(70))),
+                                                            builder:
+                                                                (BuildContext
+                                                                    context) {
+                                                              streamControllerOnTapped
+                                                                  .add(false);
+                                                              return StreamBuilder<
+                                                                      bool>(
+                                                                  stream:
+                                                                      streamControllerModal
+                                                                          .stream,
+                                                                  builder: (context,
+                                                                      snapshot) {
+                                                                    return SafeArea(
+                                                                      child:
+                                                                          Padding(
+                                                                        padding:
+                                                                            ProjectPaddingCore().paddingAllHigh,
+                                                                        child:
+                                                                            Column(
+                                                                          children: [
+                                                                            Expanded(
+                                                                              flex: 2,
+                                                                              child: Container(
+                                                                                height: CustomSize.height * 0.1,
+                                                                                width: CustomSize.width * 0.55,
+                                                                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: Colors.grey),
+                                                                                child: Row(
+                                                                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                                                  children: [
+                                                                                    Expanded(
+                                                                                        flex: 2,
+                                                                                        child: Container(
+                                                                                          child: Text("   Operasyon:${insideOrders[index].operasyonAd}"),
+                                                                                        )),
+                                                                                    Expanded(
+                                                                                        flex: 1,
+                                                                                        child: Container(
+                                                                                          child: Text("Operasyon Sıra Numarası:${insideOrders[index].rSiraNo} "),
+                                                                                        )),
+                                                                                  ],
+                                                                                ),
                                                                               ),
                                                                             ),
-                                                                          );
-                                                                        })
-                                                                    : Container(
-                                                                        height:
-                                                                            1,
-                                                                      ),
-                                                              ),
-                                                              Expanded(
-                                                                  flex: 4,
-                                                                  child: Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .spaceAround,
-                                                                    children: [
-                                                                      Container(
-                                                                        height: CustomSize.height *
-                                                                            0.1,
-                                                                        width: CustomSize.width *
-                                                                            0.2,
-                                                                        decoration: BoxDecoration(
-                                                                            borderRadius:
-                                                                                BorderRadius.circular(20),
-                                                                            color: Colors.grey),
-                                                                        child: Center(
-                                                                            child:
-                                                                                Text("Çevrim Süresi: ${getCycleModel[0].bomrecKaynak0Bv.toString()} ${getCycleModel[0].bomrecKaynak0Bu.toString()} ")),
-                                                                      ),
-                                                                      DropdownButton(
-                                                                        value:
-                                                                            selectedValue,
-                                                                        items: getMachineStateModel
-                                                                            .map((e) {
-                                                                          return DropdownMenuItem(
-                                                                              child: Text(e.workBenchCode + ' - ' + e.workBenchName),
-                                                                              value: e.workBenchCode);
-                                                                        }).toList(),
-                                                                        onChanged:
-                                                                            (String?
-                                                                                value) {
-                                                                          selectedValue =
-                                                                              value ?? getMachineStateModel.first.workBenchName;
-                                                                          streamControllerModal
-                                                                              .add(true);
-                                                                        },
-                                                                      ),
-                                                                      StreamBuilder<
-                                                                              Object>(
-                                                                          stream: streamControllerIsActive
-                                                                              .stream,
-                                                                          builder:
-                                                                              (context, snapshot) {
-                                                                            switch (snapshot.data) {
-                                                                              case false:
-                                                                                return InkWell(
-                                                                                  onTap: (() async {
-                                                                                    AwesomeDialog(
-                                                                                            width: CustomSize.width * 0.6,
-                                                                                            context: context,
-                                                                                            title: "Operasyon baslasın mı ?",
-                                                                                            btnOkOnPress: () async {
-                                                                                              await AddPersonalIE.addPersonnelIE(selectedValue, model.evrakno, (index + 1) * 10, 11553).then((value) async {
-                                                                                                if (value != null && value["status"] == 200) {
-                                                                                                  await QualityServices.isQualityCaseStarted(model.evrakno, model.ad).then(
-                                                                                                    (v) async {
-                                                                                                      Map<String, dynamic> body = {
-                                                                                                        "evrakNo": model.evrakno,
-                                                                                                        "kod": selectedValue,
-                                                                                                        "mpsNo": model.evrakno,
-                                                                                                        "d7IslemKodu": "U",
-                                                                                                        "mamulcode": model.mamulstokkodu.trimRight(),
-                                                                                                        "receteCode": model.mamulstokkodu.trimRight(),
-                                                                                                        "jobNo": "İE.22.036100001", //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
-                                                                                                        "operator_1": Constants.personelCode,
-
-                                                                                                        "cycleTime": getCycleModel[0].bomrecKaynak0Bv,
-                                                                                                        "cycleTimeCins": getCycleModel[0].bomrecKaynak0Bu.trimRight(),
-                                                                                                      };
-                                                                                                      await QualityServices.sendProduceInfo(body).then((_) async {
-                                                                                                        AwesomeDialog(
-                                                                                                                width: CustomSize.width * 0.6,
-                                                                                                                dismissOnTouchOutside: false,
-                                                                                                                dismissOnBackKeyPress: false,
-                                                                                                                context: context,
-                                                                                                                body: Text(value["message"] ?? "Unknown"),
-                                                                                                                btnOkOnPress: () {
-                                                                                                                  Navigator.push(
-                                                                                                                      context,
-                                                                                                                      MaterialPageRoute(
-                                                                                                                        builder: (_) => Home(
-                                                                                                                          allModels: model,
-                                                                                                                          getCycleModel: getCycleModel[0],
-                                                                                                                          chosenWorkBench: selectedValue,
-                                                                                                                          insideOrders: insideOrders[currentInsideOrderIndex],
-                                                                                                                          screenValue: 2,
-                                                                                                                        ),
-                                                                                                                      ));
-                                                                                                                },
-                                                                                                                btnOkText: "Tamam")
-                                                                                                            .show();
-                                                                                                      });
-
-                                                                                                      //TODO: v else handle the null return case
-                                                                                                    },
-                                                                                                  );
-                                                                                                } else if (value != null && value["status"] == 400) {
+                                                                            const Expanded(
+                                                                                child: SizedBox(
+                                                                              height: 10,
+                                                                            )),
+                                                                            Expanded(
+                                                                              flex: 9,
+                                                                              child: materials.isNotEmpty
+                                                                                  ? ListView.builder(
+                                                                                      itemCount: materials.length,
+                                                                                      itemBuilder: (BuildContext context, int index) {
+                                                                                        var iter = materials[index];
+                                                                                        return Padding(
+                                                                                          padding: ProjectPaddingCore().paddingAllLow,
+                                                                                          child: Container(
+                                                                                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(30), color: Colors.blueGrey),
+                                                                                            height: CustomSize.height * 0.04,
+                                                                                            child: Column(
+                                                                                              mainAxisAlignment: MainAxisAlignment.center,
+                                                                                              children: [
+                                                                                                Row(
+                                                                                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                                                                                  children: [
+                                                                                                    Expanded(flex: 1, child: Center(child: Text(iter.rKaynakkodu))),
+                                                                                                    Expanded(flex: 2, child: Center(child: Text(iter.ad))),
+                                                                                                    Expanded(flex: 1, child: Center(child: Text(iter.lotNumber))),
+                                                                                                    Expanded(flex: 1, child: Center(child: Text(iter.rMiktar0.toString()))),
+                                                                                                  ],
+                                                                                                ),
+                                                                                              ],
+                                                                                            ),
+                                                                                          ),
+                                                                                        );
+                                                                                      })
+                                                                                  : Container(
+                                                                                      height: 1,
+                                                                                    ),
+                                                                            ),
+                                                                            Expanded(
+                                                                                flex: 4,
+                                                                                child: Row(
+                                                                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                                                  children: [
+                                                                                    Container(
+                                                                                      height: CustomSize.height * 0.1,
+                                                                                      width: CustomSize.width * 0.2,
+                                                                                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: Colors.grey),
+                                                                                      child: Center(child: Text("Çevrim Süresi: ${getCycleModel[0].bomrecKaynak0Bv.toString()} ${getCycleModel[0].bomrecKaynak0Bu.toString()} ")),
+                                                                                    ),
+                                                                                    DropdownButton(
+                                                                                      value: selectedValue,
+                                                                                      items: getMachineStateModel.map((e) {
+                                                                                        return DropdownMenuItem(child: Text(e.workBenchCode + ' - ' + e.workBenchName), value: e.workBenchCode);
+                                                                                      }).toList(),
+                                                                                      onChanged: (String? value) {
+                                                                                        selectedValue = value ?? getMachineStateModel.first.workBenchName;
+                                                                                        streamControllerModal.add(true);
+                                                                                      },
+                                                                                    ),
+                                                                                    StreamBuilder<Object>(
+                                                                                        stream: streamControllerIsActive.stream,
+                                                                                        builder: (context, snapshot) {
+                                                                                          switch (snapshot.data) {
+                                                                                            case false:
+                                                                                              return InkWell(
+                                                                                                onTap: (() async {
                                                                                                   AwesomeDialog(
                                                                                                           width: CustomSize.width * 0.6,
-                                                                                                          dismissOnTouchOutside: false,
-                                                                                                          dismissOnBackKeyPress: false,
                                                                                                           context: context,
-                                                                                                          body: Text(value["message"] ?? "Unknown"),
-                                                                                                          btnOkOnPress: () {
-                                                                                                            Navigator.push(
-                                                                                                                context,
-                                                                                                                MaterialPageRoute(
-                                                                                                                  builder: (_) => const Home(
-                                                                                                                    screenValue: 1,
-                                                                                                                  ),
-                                                                                                                ));
-                                                                                                          },
-                                                                                                          btnOkText: "Tamam")
-                                                                                                      .show();
-                                                                                                } else {
-                                                                                                  //TODO: If request return null connetion etc.
-                                                                                                }
+                                                                                                          title: "Operasyonu başlatmak için emin misiniz?",
+                                                                                                          btnOkOnPress: () async {
+                                                                                                            await AddPersonalIE.addPersonnelIE(selectedValue, model.evrakno, (index + 1) * 10, 11553).then((value) async {
+                                                                                                              if (value != null && value["status"] == 200) {
+                                                                                                                await QualityServices.isQualityCaseStarted(model.evrakno, model.ad).then(
+                                                                                                                  (v) async {
+                                                                                                                    Map<String, dynamic> body = {
+                                                                                                                      "evrakNo": model.evrakno,
+                                                                                                                      "kod": selectedValue,
+                                                                                                                      "mpsNo": model.evrakno,
+                                                                                                                      "d7IslemKodu": "U",
+                                                                                                                      "mamulcode": model.mamulstokkodu.trimRight(),
+                                                                                                                      "receteCode": model.mamulstokkodu.trimRight(),
+                                                                                                                      "jobNo": "İE.22.036100001", //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
+                                                                                                                      "operator_1": Constants.personelCode,
 
-                                                                                                Future.delayed(const Duration(seconds: 4), () {});
-                                                                                              });
-                                                                                            },
-                                                                                            btnOkText: "Evet",
-                                                                                            btnCancelOnPress: () {},
-                                                                                            btnCancelText: "Hayır")
-                                                                                        .show();
-                                                                                  }),
-                                                                                  borderRadius: BorderRadius.circular(20),
-                                                                                  child: Ink(
-                                                                                    height: CustomSize.width * 0.1,
-                                                                                    width: CustomSize.width * 0.2,
-                                                                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: Colors.green),
-                                                                                    child: const Center(child: Text("İş Emri Al")),
-                                                                                  ),
-                                                                                );
-                                                                              case true:
-                                                                                return InkWell(
-                                                                                  onTap: (() {}),
-                                                                                  borderRadius: BorderRadius.circular(20),
-                                                                                  child: Ink(
-                                                                                    height: CustomSize.width * 0.1,
-                                                                                    width: CustomSize.width * 0.2,
-                                                                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: const Color.fromARGB(255, 79, 8, 3)),
-                                                                                    child: const Center(child: Text("Aktif iş Emriniz Bulunmaktadır.")),
-                                                                                  ),
-                                                                                );
-                                                                              default:
-                                                                                return InkWell(
-                                                                                  onTap: (() {}),
-                                                                                  borderRadius: BorderRadius.circular(20),
-                                                                                  child: Ink(
-                                                                                    height: CustomSize.width * 0.1,
-                                                                                    width: CustomSize.width * 0.2,
-                                                                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: Colors.green),
-                                                                                    child: const Center(child: Text("default")),
-                                                                                  ),
-                                                                                );
-                                                                            }
-                                                                          }),
-                                                                    ],
-                                                                  ))
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      );
-                                                    });
-                                              },
-                                            );
-                                          }),
+                                                                                                                      "cycleTime": getCycleModel[0].bomrecKaynak0Bv,
+                                                                                                                      "cycleTimeCins": getCycleModel[0].bomrecKaynak0Bu.trimRight(),
+                                                                                                                    };
+                                                                                                                    await QualityServices.sendProduceInfo(body).then((_) async {
+                                                                                                                      AwesomeDialog(
+                                                                                                                              width: CustomSize.width * 0.6,
+                                                                                                                              dismissOnTouchOutside: false,
+                                                                                                                              dismissOnBackKeyPress: false,
+                                                                                                                              context: context,
+                                                                                                                              body: Text(value["message"] ?? "Unknown"),
+                                                                                                                              btnOkOnPress: () {
+                                                                                                                                Navigator.push(
+                                                                                                                                    context,
+                                                                                                                                    MaterialPageRoute(
+                                                                                                                                      builder: (_) => Home(
+                                                                                                                                        allModels: model,
+                                                                                                                                        getCycleModel: getCycleModel[0],
+                                                                                                                                        chosenWorkBench: selectedValue,
+                                                                                                                                        insideOrders: insideOrders[currentInsideOrderIndex],
+                                                                                                                                        screenValue: 2,
+                                                                                                                                      ),
+                                                                                                                                    ));
+                                                                                                                              },
+                                                                                                                              btnOkText: "Tamam")
+                                                                                                                          .show();
+                                                                                                                    });
+
+                                                                                                                    //TODO: v else handle the null return case
+                                                                                                                  },
+                                                                                                                );
+                                                                                                              } else if (value != null && value["status"] == 400) {
+                                                                                                                AwesomeDialog(
+                                                                                                                        width: CustomSize.width * 0.6,
+                                                                                                                        dismissOnTouchOutside: false,
+                                                                                                                        dismissOnBackKeyPress: false,
+                                                                                                                        context: context,
+                                                                                                                        body: Text(value["message"] ?? "Unknown"),
+                                                                                                                        btnOkOnPress: () {
+                                                                                                                          Navigator.push(
+                                                                                                                              context,
+                                                                                                                              MaterialPageRoute(
+                                                                                                                                builder: (_) => const Home(
+                                                                                                                                  screenValue: 1,
+                                                                                                                                ),
+                                                                                                                              ));
+                                                                                                                        },
+                                                                                                                        btnOkText: "Tamam")
+                                                                                                                    .show();
+                                                                                                              } else {
+                                                                                                                //TODO: If request return null connetion etc.
+                                                                                                              }
+
+                                                                                                              Future.delayed(const Duration(seconds: 4), () {});
+                                                                                                            });
+                                                                                                          },
+                                                                                                          btnOkText: "Evet",
+                                                                                                          btnCancelOnPress: () {},
+                                                                                                          btnCancelText: "Hayır")
+                                                                                                      .show();
+                                                                                                }),
+                                                                                                borderRadius: BorderRadius.circular(20),
+                                                                                                child: Ink(
+                                                                                                  height: CustomSize.width * 0.1,
+                                                                                                  width: CustomSize.width * 0.2,
+                                                                                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: Colors.green),
+                                                                                                  child: const Center(child: Text("İş Emri Al")),
+                                                                                                ),
+                                                                                              );
+                                                                                            case true:
+                                                                                              return InkWell(
+                                                                                                onTap: (() {}),
+                                                                                                borderRadius: BorderRadius.circular(20),
+                                                                                                child: Ink(
+                                                                                                  height: CustomSize.width * 0.1,
+                                                                                                  width: CustomSize.width * 0.2,
+                                                                                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: const Color.fromARGB(255, 79, 8, 3)),
+                                                                                                  child: const Center(child: Text("Aktif iş Emriniz Bulunmaktadır.")),
+                                                                                                ),
+                                                                                              );
+                                                                                            default:
+                                                                                              return InkWell(
+                                                                                                onTap: (() {}),
+                                                                                                borderRadius: BorderRadius.circular(20),
+                                                                                                child: Ink(
+                                                                                                  height: CustomSize.width * 0.1,
+                                                                                                  width: CustomSize.width * 0.2,
+                                                                                                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: Colors.green),
+                                                                                                  child: const Center(child: Text("default")),
+                                                                                                ),
+                                                                                              );
+                                                                                          }
+                                                                                        }),
+                                                                                  ],
+                                                                                ))
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  });
+                                                            },
+                                                          );
+                                                        });
+
+                                                  case true:
+                                                    return CustomCircularIndicator(
+                                                        currentDotColor: Colors
+                                                            .grey.shade700,
+                                                        defaultDotColor:
+                                                            Colors.white,
+                                                        numDots: 10);
+
+                                                  default:
+                                                    return const Text("data");
+                                                }
+                                              }),
                                         ),
                                       ],
                                     ),
@@ -695,46 +719,6 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
             fit: BoxFit.fill,
           ),
           color: Colors.blueGrey),
-    );
-  }
-}
-
-class AlertDialogFreeStateWidget extends StatefulWidget {
-  const AlertDialogFreeStateWidget({
-    Key? key,
-    required this.machineStatesFree,
-  }) : super(key: key);
-
-  final List<GetMachineStateModel> machineStatesFree;
-
-  @override
-  State<AlertDialogFreeStateWidget> createState() =>
-      _AlertDialogFreeStateWidgetState();
-}
-
-class _AlertDialogFreeStateWidgetState
-    extends State<AlertDialogFreeStateWidget> {
-  String selectedValue = "CNC TORNA 4";
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 300,
-      child: DropdownButton(
-        value: selectedValue,
-        items: widget.machineStatesFree.map((e) {
-          return DropdownMenuItem(
-            child: Text(e.workBenchName),
-            value: e.workBenchName,
-          );
-        }).toList(),
-        onChanged: (String? value) {
-          // This is called when the user selects an item.
-          setState(() {
-            selectedValue = value!;
-          });
-        },
-      ),
     );
   }
 }
