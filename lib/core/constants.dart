@@ -41,3 +41,18 @@ class CustomSize {
   static double height = 0.0;
   static int counter = 1;
 }
+
+class RequiredParameter {
+  static String requiredEvrakNo = "";
+  static String requiredKod = "";
+  static String requiredMpsNo = "";
+  static String requiredD7IslemKodu = "";
+  static String requiredMamulcode = "";
+  static String requiredReceteCode = "";
+  static String requiredJobNo = "";
+  static String requiredOperator_1 = "";
+  static int requiredCycleTime = 0;
+  static String requiredCycleTimeCins = "";
+  static String requiredMusteriAd = "";
+  static String requiredMamulAd = "";
+}

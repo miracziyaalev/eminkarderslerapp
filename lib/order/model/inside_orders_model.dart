@@ -13,6 +13,7 @@ String getInsideOrdersInfoModelToJson(GetInsideOrdersInfoModel data) =>
 class GetInsideOrdersInfoModel {
   GetInsideOrdersInfoModel({
     required this.rKaynakKodu,
+    required this.jobNo,
     required this.evrakNo,
     required this.receteNotu,
     required this.rAcikKapali,
@@ -22,6 +23,7 @@ class GetInsideOrdersInfoModel {
   });
 
   String rKaynakKodu;
+  String jobNo;
   String evrakNo;
   String receteNotu;
   String rAcikKapali;
@@ -32,6 +34,7 @@ class GetInsideOrdersInfoModel {
   factory GetInsideOrdersInfoModel.fromJson(Map<String, dynamic> json) =>
       GetInsideOrdersInfoModel(
         rKaynakKodu: json["r_KaynakKodu"] ?? "",
+        jobNo: json["jobNo"] ?? "",
         evrakNo: json["evrakNo"] ?? "",
         receteNotu: json["receteNotu"] ?? "",
         rAcikKapali: json["r_Acik_Kapali"] ?? "",
@@ -42,6 +45,7 @@ class GetInsideOrdersInfoModel {
 
   Map<String, dynamic> toJson() => {
         "r_KaynakKodu": rKaynakKodu,
+        "jobNo": jobNo,
         "evrakNo": evrakNo,
         "receteNotu": receteNotu,
         "r_Acik_Kapali": rAcikKapali,

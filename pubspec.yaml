@@ -48,6 +48,7 @@ dependencies:
   lottie: ^2.0.0
   internet_connection_checker: ^1.0.0+1
   flutter_launcher_icons: ^0.11.0
+  fluttertoast: ^8.1.2
 
   
 dev_dependencies:

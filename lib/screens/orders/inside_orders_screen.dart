@@ -54,6 +54,59 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
     }
   }
 
+  Future<void> saveRequiredParameters() async {
+    final model =
+        ModalRoute.of(context)!.settings.arguments as GetWorkOrdersInfModel;
+
+    Map<String, dynamic> currentValues = {
+      "evrakNo": model.evrakno,
+      "kod": selectedValue,
+      "mpsNo": model.evrakno,
+
+      "mamulcode": model.mamulstokkodu.trimRight(),
+      "receteCode": model.mamulstokkodu.trimRight(),
+      //  "jobNo":
+      //       "İE.22.036100001", //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
+      //     "operator_1": Constants.personelCode,
+      //   "cycleTime": getCycleModel[0].bomrecKaynak0Bv,
+      //   "cycleTimeCins": getCycleModel[0].bomrecKaynak0Bu.trimRight(),
+      //   "musteriAd": model.musteriAd,
+      //   "mamulAd": model.ad,
+    };
+
+    SharedPreferences prefRequired = await SharedPreferences.getInstance();
+    // prefRequired.setString("currentValues", jsonEncode(currentValues));
+    prefRequired.setString("evrakNo", model.evrakno);
+    prefRequired.setString("kod", selectedValue);
+    prefRequired.setString("mpsNo", model.evrakno);
+    prefRequired.setString("mamulcode", model.mamulstokkodu.trimRight());
+    prefRequired.setString("receteCode", model.mamulstokkodu.trimRight());
+    prefRequired.setString("jobNo", "İE.22.036100001");
+    prefRequired.setString("operator_1", Constants.personelCode);
+    prefRequired.setInt("cycleTime", getCycleModel[0].bomrecKaynak0Bv);
+    prefRequired.setString(
+        "cycleTimeCins", getCycleModel[0].bomrecKaynak0Bu.trimRight());
+    prefRequired.setString("musteriAd", model.musteriAd);
+    prefRequired.setString("mamulAd", model.ad);
+
+    // var x = await prefRequired.getString("currentValues");
+    //var json = jsonDecode(x ?? "");
+
+    // print(json["mpsNo"]);
+    // RequiredParameter.requiredEvrakNo = json["evrakNo"];
+    // RequiredParameter.requiredKod = json["kod"];
+    //RequiredParameter.requiredMpsNo = json["mpsNo"];
+
+    // RequiredParameter.requiredMamulcode = json["mamulcode"];
+    // RequiredParameter.requiredReceteCode = json["receteCode"];
+    //  RequiredParameter.requiredJobNo = json["jobNo"];
+    //  RequiredParameter.requiredOperator_1 = json["operator_1"];
+    //  RequiredParameter.requiredCycleTime = json["cycleTime"];
+    //  RequiredParameter.requiredCycleTimeCins = json["cycleTimeCins"];
+    // RequiredParameter.requiredMusteriAd = json["musteriAd"];
+    // RequiredParameter.requiredMamulAd = json["mamulAd"];
+  }
+
   @override
   void initState() {
     streamController = BehaviorSubject<STATE>();
@@ -497,7 +550,8 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                                                                                           context: context,
                                                                                                           title: "Operasyonu başlatmak için emin misiniz?",
                                                                                                           btnOkOnPress: () async {
-                                                                                                            await AddPersonalIE.addPersonnelIE(selectedValue, model.evrakno, (index + 1) * 10, 11553).then((value) async {
+                                                                                                            saveRequiredParameters();
+                                                                                                            await AddPersonalIE.addPersonnelIE(selectedValue, model.evrakno, (index + 1) * 10, item.jobNo, model.ad, model.mamulstokkodu).then((value) async {
                                                                                                               if (value != null && value["status"] == 200) {
                                                                                                                 await QualityServices.isQualityCaseStarted(model.evrakno, model.ad).then(
                                                                                                                   (v) async {

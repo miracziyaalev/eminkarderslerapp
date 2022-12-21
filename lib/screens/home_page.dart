@@ -113,7 +113,12 @@ class _HomeState extends State<Home> {
                         if (!Constants.isHasIE!) {
                           SharedPreferences prefs =
                               await SharedPreferences.getInstance();
+
+                          SharedPreferences prefRequired =
+                              await SharedPreferences.getInstance();
                           prefs.clear();
+                          prefRequired.clear();
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(

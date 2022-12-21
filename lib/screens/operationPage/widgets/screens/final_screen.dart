@@ -82,6 +82,8 @@ class _FinalScreenState extends State<FinalScreen> {
 
   @override
   void initState() {
+    saveRequiredParameters();
+    // readRequiredParameters();
     streamController = BehaviorSubject<bool>();
     streamControllerStop = BehaviorSubject<bool>();
     //  constValues().then((value) => getConsValues());
@@ -89,18 +91,58 @@ class _FinalScreenState extends State<FinalScreen> {
     super.initState();
   }
 
-  Future<void> saveRequiredParameters(bool checkState) async {
+  Future<void> saveRequiredParameters() async {
     Map<String, dynamic> currentValues = {
-      "checkState": checkState,
-      "mpsNo": allModels?.evrakno ?? "",
-      "musteriAd": allModels?.musteriAd ?? "",
-      "mamulAd": allModels?.ad ?? "",
+      // "checkState": checkState,
+      "evrakNo": allModels?.evrakno,
+      "kod": chosenWorkBench,
+      "mpsNo": allModels?.evrakno,
+      "mamulcode": allModels?.mamulstokkodu.trimRight(),
+      "receteCode": allModels?.mamulstokkodu.trimRight(),
+      "jobNo":
+          "İE.22.036100001", //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
+      "operator_1": Constants.personelCode,
+      "cycleTime": getCycleModel?.bomrecKaynak0Bv,
+      "cycleTimeCins": getCycleModel?.bomrecKaynak0Bu.trimRight(),
+      "musteriAd": allModels?.musteriAd,
+      "mamulAd": allModels?.ad,
     };
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString("currentValues", jsonEncode(currentValues));
-    var x = prefs.getString("currentValues");
+
+    SharedPreferences prefRequired = await SharedPreferences.getInstance();
+    // prefRequired.setString("currentValues", jsonEncode(currentValues));
+    // var x = prefRequired.getString("currentValues");
+    // var json = jsonDecode(x ?? "");
+    // print(json["checkState"]);
+    // print(json["mpsNo"]);
+    //RequiredParameter.requiredEvrakNo = json["mpsNo"];
+
+    RequiredParameter.requiredEvrakNo = prefRequired.getString("evrakNo") ?? "";
+    RequiredParameter.requiredKod = prefRequired.getString("kod") ?? "";
+    RequiredParameter.requiredMpsNo = prefRequired.getString("mpsNo") ?? "";
+    RequiredParameter.requiredMamulcode =
+        prefRequired.getString("mamulcode") ?? "";
+    RequiredParameter.requiredReceteCode =
+        prefRequired.getString("receteCode") ?? "";
+    RequiredParameter.requiredJobNo = prefRequired.getString("jobNo") ?? "";
+    RequiredParameter.requiredOperator_1 =
+        prefRequired.getString("operator_1") ?? "";
+    RequiredParameter.requiredCycleTime = prefRequired.getInt("cycleTime") ?? 0;
+    RequiredParameter.requiredCycleTimeCins =
+        prefRequired.getString("cycleTimeCins") ?? "";
+    RequiredParameter.requiredMusteriAd =
+        prefRequired.getString("musteriAd") ?? "";
+    RequiredParameter.requiredMamulAd = prefRequired.getString("mamulAd") ?? "";
+  }
+
+  Future<String> readRequiredParameters() async {
+    SharedPreferences prefRequired = await SharedPreferences.getInstance();
+    var x = prefRequired.getString("currentValues");
     var json = jsonDecode(x ?? "");
-    print(json["checkState"]);
+    RequiredParameter.requiredEvrakNo = json["mpsNo"];
+
+    print(RequiredParameter.requiredEvrakNo);
+
+    return json["mpsNo"];
   }
 
   @override
@@ -246,16 +288,21 @@ class _FinalScreenState extends State<FinalScreen> {
                                   : Colors.red,
                               borderRadius: Constants.cardBorderRadius,
                             ),
-                            child: Center(
-                              child: Text(
-                                !checkStateProvider
-                                    ? "Operasyon Devam Ediyor."
-                                    : "Operasyon Durduruldu.",
-                                style: const TextStyle(
-                                  fontSize: 30,
-                                  fontStyle: FontStyle.italic,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Center(
+                                  child: Text(
+                                    !checkStateProvider
+                                        ? "Operasyon Devam Ediyor."
+                                        : "Operasyon Durduruldu.",
+                                    style: const TextStyle(
+                                      fontSize: 30,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
                           ),
                         ),
@@ -345,20 +392,21 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                                             fillColor: Colors.red,
                                                                                             onPressed: () async {
                                                                                               Map<String, dynamic> body = {
-                                                                                                // "evrakNo": allModels?.evrakno,
-                                                                                                // "kod": chosenWorkBench,
-                                                                                                "mpsNo": allModels?.evrakno,
+                                                                                                //  "evrakNo": RequiredParameter.requiredEvrakNo,
+                                                                                                //  "kod": RequiredParameter.requiredKod,
+                                                                                                "mpsNo": RequiredParameter.requiredMpsNo,
                                                                                                 "d7IslemKodu": stopReasons.firstWhere((element) => element.stopCode == selectedValue).stopValue,
-                                                                                                // "stopReason": selectedValue.toString().padLeft(2, "0"),
-                                                                                                // "mamulcode": allModels?.mamulstokkodu.trimRight(),
-                                                                                                // "receteCode": allModels?.mamulstokkodu.trimRight(),
-                                                                                                "jobNo": "İE.22.036100001", //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
-                                                                                                // "operator_1": Constants.personelCode,
+                                                                                                //  "stopReason": selectedValue.toString().padLeft(2, "0"),
+                                                                                                //  "mamulcode": RequiredParameter.requiredMamulcode,
+                                                                                                //  "receteCode": RequiredParameter.requiredReceteCode,
+                                                                                                "jobNo": RequiredParameter.requiredJobNo, //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
+                                                                                                //  "operator_1": RequiredParameter.requiredOperator_1,
 
-                                                                                                // "cycleTime": getCycleModel?.bomrecKaynak0Bv,
-                                                                                                // "cycleTimeCins": getCycleModel?.bomrecKaynak0Bu.trimRight(),
+                                                                                                //  "cycleTime": RequiredParameter.requiredCycleTime,
+                                                                                                // "cycleTimeCins": RequiredParameter.requiredCycleTimeCins,
                                                                                               };
                                                                                               await QualityServices.continueProcess(body);
+
                                                                                               streamControllerStop.add(false);
                                                                                               Navigator.pop(context);
                                                                                               Provider.of<CheckStateProvider>(context, listen: false).checkStateFun();
@@ -499,15 +547,15 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                                             fillColor: Colors.red,
                                                                                             onPressed: () async {
                                                                                               Map<String, dynamic> body = {
-                                                                                                "evrakNo": allModels?.evrakno,
-                                                                                                "kod": chosenWorkBench,
-                                                                                                "mpsNo": allModels?.evrakno,
+                                                                                                "evrakNo": RequiredParameter.requiredEvrakNo,
+                                                                                                "kod": RequiredParameter.requiredKod,
+                                                                                                "mpsNo": RequiredParameter.requiredMpsNo,
                                                                                                 "d7IslemKodu": stopReasons.firstWhere((element) => element.stopCode == selectedValue).stopValue,
                                                                                                 "stopReason": selectedValue.toString().padLeft(2, "0"),
-                                                                                                "mamulcode": allModels?.mamulstokkodu.trimRight(),
-                                                                                                "receteCode": allModels?.mamulstokkodu.trimRight(),
-                                                                                                "jobNo": "İE.22.036100001", //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
-                                                                                                "operator_1": Constants.personelCode,
+                                                                                                "mamulcode": RequiredParameter.requiredMamulcode,
+                                                                                                "receteCode": RequiredParameter.requiredReceteCode,
+                                                                                                "jobNo": RequiredParameter.requiredJobNo, //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
+                                                                                                "operator_1": RequiredParameter.requiredOperator_1,
 
                                                                                                 // "cycleTime": getCycleModel?.bomrecKaynak0Bv,
                                                                                                 // "cycleTimeCins": getCycleModel?.bomrecKaynak0Bu.trimRight(),
@@ -608,11 +656,10 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                     hintText:
                                                                         "Üretim Adedini Giriniz",
                                                                     onChanged:
-                                                                        (p0) {
-                                                                      String
-                                                                          result =
-                                                                          p0 ??
-                                                                              "";
+                                                                        (i) {
+                                                                      int i =
+                                                                          int.tryParse(textController.text) ??
+                                                                              0;
                                                                     },
                                                                   ),
                                                                 ),
@@ -658,24 +705,23 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                                           title: "Gün sonu bildirmeye emin misiniz?",
                                                                                           btnOkOnPress: (() {
                                                                                             Map<String, dynamic> body = {
-                                                                                              // "evrakNo": allModels?.evrakno,
-                                                                                              // "kod": chosenWorkBench,
-                                                                                              "mpsNo": allModels?.evrakno,
+                                                                                              "evrakNo": RequiredParameter.requiredEvrakNo,
+                                                                                              "kod": RequiredParameter.requiredKod,
+                                                                                              "mpsNo": RequiredParameter.requiredMpsNo,
                                                                                               "d7IslemKodu": "U",
-                                                                                              // "mamulcode": allModels?.mamulstokkodu.trimRight(),
-                                                                                              // "receteCode": allModels?.mamulstokkodu.trimRight(),
-                                                                                              "jobNo": "İE.22.036100001", //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
-                                                                                              // "operator_1": Constants.personelCode,
-
-                                                                                              // "cycleTime": getCycleModel?.bomrecKaynak0Bv,
-                                                                                              // "cycleTimeCins": getCycleModel?.bomrecKaynak0Bu.trimRight(),
+                                                                                              "mamulcode": RequiredParameter.requiredMamulcode,
+                                                                                              "receteCode": RequiredParameter.requiredReceteCode,
+                                                                                              "jobNo": RequiredParameter.requiredJobNo, //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
+                                                                                              "operator_1": RequiredParameter.requiredOperator_1,
+                                                                                              "cycleTime": RequiredParameter.requiredCycleTime,
+                                                                                              "cycleTimeCins": RequiredParameter.requiredCycleTimeCins,
                                                                                               "d7Aksiyon": "C",
                                                                                               "tm_miktar": textController.text,
                                                                                               "fire_miktar": textController2.text,
                                                                                               "operasyonTekrarSayisi": textController.text,
                                                                                             };
 
-                                                                                            EndOfTheDay.endOfTheDay().then((value) async {
+                                                                                            EndOfTheDay.endOfTheDay(1, 0, (RequiredParameter.requiredCycleTime / 60)).then((value) async {
                                                                                               if (value != null && value["status"] == 200) {
                                                                                                 await QualityServices.endOfDayQuality(body).then((result) async {
                                                                                                   //TODO: write http request and handle the response
@@ -846,17 +892,16 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                                           title: "İş emrini bitirmek için emin misiniz?",
                                                                                           btnOkOnPress: (() {
                                                                                             Map<String, dynamic> body = {
-                                                                                              // "evrakNo": allModels?.evrakno,
-                                                                                              // "kod": chosenWorkBench,
-                                                                                              "mpsNo": allModels?.evrakno,
+                                                                                              "evrakNo": RequiredParameter.requiredEvrakNo,
+                                                                                              "kod": RequiredParameter.requiredKod,
+                                                                                              "mpsNo": RequiredParameter.requiredMpsNo,
                                                                                               "d7IslemKodu": "U",
-                                                                                              // "mamulcode": allModels?.mamulstokkodu.trimRight(),
-                                                                                              // "receteCode": allModels?.mamulstokkodu.trimRight(),
-                                                                                              "jobNo": "İE.22.036100001", //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
-                                                                                              // "operator_1": Constants.personelCode,
-
-                                                                                              // "cycleTime": getCycleModel?.bomrecKaynak0Bv,
-                                                                                              // "cycleTimeCins": getCycleModel?.bomrecKaynak0Bu.trimRight(),
+                                                                                              "mamulcode": RequiredParameter.requiredMamulcode,
+                                                                                              "receteCode": RequiredParameter.requiredReceteCode,
+                                                                                              "jobNo": RequiredParameter.requiredJobNo, //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
+                                                                                              "operator_1": RequiredParameter.requiredOperator_1,
+                                                                                              "cycleTime": RequiredParameter.requiredCycleTime,
+                                                                                              "cycleTimeCins": RequiredParameter.requiredCycleTimeCins,
                                                                                               "d7Aksiyon": "E",
                                                                                               "tm_miktar": textController.text,
                                                                                               "fire_miktar": textController2.text,
@@ -966,28 +1011,31 @@ class _FinalScreenState extends State<FinalScreen> {
                         child: customContainer_(
                           customHeight: CustomSize.height,
                           customWidth: CustomSize.width,
-                          denemeMMPS: allModels?.evrakno ?? '',
+                          denemeMMPS: allModels?.evrakno ??
+                              RequiredParameter.requiredEvrakNo,
                         ),
                       ),
                       Expanded(
                         child: customContainer_(
                           customHeight: CustomSize.height,
                           customWidth: CustomSize.width,
-                          denemeMMPS: allModels?.ad ?? "-",
+                          denemeMMPS: allModels?.ad ??
+                              RequiredParameter.requiredMamulAd,
                         ),
+                      ),
+                      Expanded(
+                        child: customContainer_(
+                            customHeight: CustomSize.height,
+                            customWidth: CustomSize.width,
+                            denemeMMPS:
+                                ("Çevrim Süresi: ${getCycleModel?.bomrecKaynak0Bv.toString()} Saniye")),
                       ),
                       Expanded(
                         child: customContainer_(
                           customHeight: CustomSize.height,
                           customWidth: CustomSize.width,
-                          denemeMMPS: "08.11.2022",
-                        ),
-                      ),
-                      Expanded(
-                        child: customContainer_(
-                          customHeight: CustomSize.height,
-                          customWidth: CustomSize.width,
-                          denemeMMPS: allModels?.musteriAd ?? "-",
+                          denemeMMPS: allModels?.musteriAd ??
+                              RequiredParameter.requiredMusteriAd,
                         ),
                       ),
                       Expanded(

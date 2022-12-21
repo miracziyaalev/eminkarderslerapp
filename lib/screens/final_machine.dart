@@ -73,88 +73,92 @@ class _FinalMachineStateState extends State<FinalMachineState> {
                 numDots: 10,
               ));
             case STATE.loadedScreen:
-              return GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
-                ),
-                itemCount: machineStates.length,
-                itemBuilder: (BuildContext context, int index) {
-                  var item = machineStates[index];
-                  return Container(
-                    height: customHeight * 0.4,
-                    width: customWidth * 0.3,
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                        color: item.state ? stateMachineWork : stateMachineFree,
-                        borderRadius: borderRadius),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          flex: 6,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: borderRadius,
-                            ),
-                            child: ClipRRect(
-                              borderRadius: borderRadius,
-                              child: Image(
-                                image: AssetImage(assetsimagejpg),
-                                fit: BoxFit.cover,
-                                width: customWidth,
+              return Padding(
+                padding: const EdgeInsets.all(8),
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20,
+                  ),
+                  itemCount: machineStates.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    var item = machineStates[index];
+                    return Container(
+                      height: customHeight * 0.40,
+                      width: customWidth * 0.3,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                          color:
+                              item.state ? stateMachineWork : stateMachineFree,
+                          borderRadius: borderRadius),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            flex: 6,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                borderRadius: borderRadius,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: borderRadius,
+                                child: Image(
+                                  image: AssetImage(assetsimagejpg),
+                                  fit: BoxFit.cover,
+                                  width: customWidth,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                                flex: 1,
-                                child: SizedBox(
-                                  height: 50,
-                                  child: Center(
-                                      child: Text(
-                                    item.personalName ??
-                                        "Tanımlı kullanıcı yok.",
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                  flex: 1,
+                                  child: SizedBox(
+                                    height: 50,
+                                    child: Center(
+                                        child: Text(
+                                      item.personalName ??
+                                          "Tanımlı kullanıcı yok.",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    )),
                                   )),
-                                )),
-                            Expanded(
-                                flex: 1,
-                                child: SizedBox(
-                                  height: 50,
-                                  child: Center(
-                                      child: Text(
-                                    item.isEmri ?? "Tanımlı İE yok.",
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
+                              Expanded(
+                                  flex: 1,
+                                  child: SizedBox(
+                                    height: 50,
+                                    child: Center(
+                                        child: Text(
+                                      item.isEmri ?? "Tanımlı İE yok.",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    )),
                                   )),
-                                )),
-                            Expanded(
-                                flex: 1,
-                                child: SizedBox(
-                                  height: 50,
-                                  child: Center(
-                                      child: Text(
-                                    item.workBenchCode,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
+                              Expanded(
+                                  flex: 1,
+                                  child: SizedBox(
+                                    height: 50,
+                                    child: Center(
+                                        child: Text(
+                                      item.workBenchCode,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    )),
                                   )),
-                                )),
-                          ],
-                        )
-                      ],
-                    ),
-                  );
-                },
+                            ],
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                ),
               );
             case STATE.connectionErrorScreen:
               return const Center(child: Text("Connection Error"));

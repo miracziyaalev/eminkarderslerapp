@@ -5,8 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AddPersonalIE {
-  static Future<dynamic> addPersonnelIE(
-      String workBench, String workOrder, int operationCode, int jobNo) async {
+  static Future<dynamic> addPersonnelIE(String workBench, String workOrder,
+      int operationCode, String jobNo, String notes, String mamulKod) async {
     try {
       var response = await http.post(
           Uri.parse('${Constants.baseURL}${Constants.getWorktoPerson}'),
@@ -18,7 +18,9 @@ class AddPersonalIE {
             "workBench": workBench,
             "workOrder": workOrder,
             "operationCode": operationCode,
-            "jobNo": jobNo
+            "jobNo": jobNo,
+            "notes": notes,
+            "mamulKod": mamulKod
           }));
 
       if (response.statusCode == 200) {
@@ -33,7 +35,7 @@ class AddPersonalIE {
       } else if (response.statusCode == 400) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isHasIE', false);
-          Map<String, dynamic> result = {
+        Map<String, dynamic> result = {
           "status": response.statusCode,
           "message": response.body
         };
