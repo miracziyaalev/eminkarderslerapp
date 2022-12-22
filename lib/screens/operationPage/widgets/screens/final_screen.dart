@@ -656,10 +656,11 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                     hintText:
                                                                         "Üretim Adedini Giriniz",
                                                                     onChanged:
-                                                                        (i) {
-                                                                      int i =
-                                                                          int.tryParse(textController.text) ??
-                                                                              0;
+                                                                        (p0) {
+                                                                      String
+                                                                          result =
+                                                                          p0 ??
+                                                                              "";
                                                                     },
                                                                   ),
                                                                 ),
@@ -721,7 +722,7 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                                               "operasyonTekrarSayisi": textController.text,
                                                                                             };
 
-                                                                                            EndOfTheDay.endOfTheDay(1, 0, (RequiredParameter.requiredCycleTime / 60)).then((value) async {
+                                                                                            EndOfTheDay.endOfTheDay(int.tryParse(textController.text) ?? 0, int.tryParse(textController2.text) ?? 0, (RequiredParameter.requiredCycleTime / 60)).then((value) async {
                                                                                               if (value != null && value["status"] == 200) {
                                                                                                 await QualityServices.endOfDayQuality(body).then((result) async {
                                                                                                   //TODO: write http request and handle the response
