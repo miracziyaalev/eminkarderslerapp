@@ -14,6 +14,8 @@ class Constants {
   static String getWorktoPerson = "Personel_IE/AddPersonelIE";
   static String endOfTheDay = "Personel_IE/GunSonuPersonel_IE";
   static String endOfTheWorkOrder = "Personel_IE/ClosePersonel_IE";
+  static String addDurus = "Personel_IE/AddDurus";
+  static String closeDurus = "Personel_IE/CloseDurus";
 
   static String bearerToken = "";
   static String userName = "";

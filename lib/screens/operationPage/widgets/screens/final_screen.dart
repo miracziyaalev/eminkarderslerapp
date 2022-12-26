@@ -8,6 +8,8 @@ import 'package:eminkardeslerapp/order/model/cycle_model.dart';
 import 'package:eminkardeslerapp/order/model/inside_orders_model.dart';
 import 'package:eminkardeslerapp/order/model/orders_model.dart';
 import 'package:eminkardeslerapp/order/services/qualityServices/qualityServices.dart';
+import 'package:eminkardeslerapp/order/services/workOrdersPersonState/addDurus.dart';
+import 'package:eminkardeslerapp/order/services/workOrdersPersonState/closeDurus.dart';
 import 'package:eminkardeslerapp/order/services/workOrdersPersonState/endOfTheDay.dart';
 import 'package:eminkardeslerapp/order/services/workOrdersPersonState/endOfTheWorkOrder.dart';
 import 'package:eminkardeslerapp/providers/final_screen_providers.dart';
@@ -394,22 +396,36 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                                               Map<String, dynamic> body = {
                                                                                                 //  "evrakNo": RequiredParameter.requiredEvrakNo,
                                                                                                 //  "kod": RequiredParameter.requiredKod,
-                                                                                                "mpsNo": RequiredParameter.requiredMpsNo,
+                                                                                                // "mpsNo": RequiredParameter.requiredMpsNo,
                                                                                                 "d7IslemKodu": stopReasons.firstWhere((element) => element.stopCode == selectedValue).stopValue,
-                                                                                                //  "stopReason": selectedValue.toString().padLeft(2, "0"),
+                                                                                                "stopReason": selectedValue.toString().padLeft(2, "0"),
                                                                                                 //  "mamulcode": RequiredParameter.requiredMamulcode,
                                                                                                 //  "receteCode": RequiredParameter.requiredReceteCode,
-                                                                                                "jobNo": RequiredParameter.requiredJobNo, //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
+                                                                                                //"jobNo": RequiredParameter.requiredJobNo, //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
                                                                                                 //  "operator_1": RequiredParameter.requiredOperator_1,
 
                                                                                                 //  "cycleTime": RequiredParameter.requiredCycleTime,
                                                                                                 // "cycleTimeCins": RequiredParameter.requiredCycleTimeCins,
                                                                                               };
-                                                                                              await QualityServices.continueProcess(body);
+                                                                                              //await QualityServices.continueProcess(body);
 
-                                                                                              streamControllerStop.add(false);
-                                                                                              Navigator.pop(context);
-                                                                                              Provider.of<CheckStateProvider>(context, listen: false).checkStateFun();
+                                                                                              await hasConnection().then((value) async {
+                                                                                                if (value == true) {
+                                                                                                  await CloseDurus.closeDurusService().then((value) {
+                                                                                                    if (value != null && value["status"] == 200) {
+                                                                                                      streamControllerStop.add(false);
+                                                                                                      Navigator.pop(context);
+                                                                                                      Provider.of<CheckStateProvider>(context, listen: false).checkStateFun();
+
+                                                                                                      print("devam etme basarili");
+                                                                                                    } else {
+                                                                                                      print("devam etme basarisiz");
+                                                                                                    }
+                                                                                                  });
+                                                                                                }
+
+                                                                                               
+                                                                                              });
                                                                                             },
                                                                                             child: const Text("Devam Et"),
                                                                                           ),
@@ -547,24 +563,35 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                                             fillColor: Colors.red,
                                                                                             onPressed: () async {
                                                                                               Map<String, dynamic> body = {
-                                                                                                "evrakNo": RequiredParameter.requiredEvrakNo,
-                                                                                                "kod": RequiredParameter.requiredKod,
-                                                                                                "mpsNo": RequiredParameter.requiredMpsNo,
+                                                                                                //"evrakNo": RequiredParameter.requiredEvrakNo,
+                                                                                                // "kod": RequiredParameter.requiredKod,
+                                                                                                //"mpsNo": RequiredParameter.requiredMpsNo,
                                                                                                 "d7IslemKodu": stopReasons.firstWhere((element) => element.stopCode == selectedValue).stopValue,
                                                                                                 "stopReason": selectedValue.toString().padLeft(2, "0"),
-                                                                                                "mamulcode": RequiredParameter.requiredMamulcode,
-                                                                                                "receteCode": RequiredParameter.requiredReceteCode,
-                                                                                                "jobNo": RequiredParameter.requiredJobNo, //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
-                                                                                                "operator_1": RequiredParameter.requiredOperator_1,
+                                                                                                // "mamulcode": RequiredParameter.requiredMamulcode,
+                                                                                                // "receteCode": RequiredParameter.requiredReceteCode,
+                                                                                                //"jobNo": RequiredParameter.requiredJobNo, //r_KAYNAKKODU'NU NASIL çekiyorsan aynı şekilde de MMPS10T.JOBNO
+                                                                                                //"operator_1": RequiredParameter.requiredOperator_1,
 
                                                                                                 // "cycleTime": getCycleModel?.bomrecKaynak0Bv,
                                                                                                 // "cycleTimeCins": getCycleModel?.bomrecKaynak0Bu.trimRight(),
                                                                                               };
-                                                                                              await QualityServices.stopReasonInfo(body);
 
-                                                                                              streamControllerStop.add(true);
-                                                                                              Navigator.pop(context);
-                                                                                              Provider.of<CheckStateProvider>(context, listen: false).checkStateFun();
+                                                                                              await hasConnection().then((value) async {
+                                                                                                if (value == true) {
+                                                                                                  await AddDurus.addDurusService(d7islemKodu: body["d7IslemKodu"], durmaSebebi: body["stopReason"]).then((value) {
+                                                                                                    if (value != null && value["status"] == 200) {
+                                                                                                      streamControllerStop.add(true);
+                                                                                                      Navigator.pop(context);
+                                                                                                      Provider.of<CheckStateProvider>(context, listen: false).checkStateFun();
+                                                                                                      print("durus baslatma basarili");
+                                                                                                    } else {
+                                                                                                      print("basarisiz");
+                                                                                                    }
+                                                                                                  });
+                                                                                                }
+                                                                                              });
+                                                                                              // await QualityServices.stopReasonInfo(body);
                                                                                             },
                                                                                             child: const Text("Duruş Bildir"),
                                                                                           ),
