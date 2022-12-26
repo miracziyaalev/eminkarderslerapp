@@ -723,6 +723,8 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                                 Colors.red,
                                                                             onPressed:
                                                                                 () async {
+                                                                                  
+                                                                              
                                                                               FocusScope.of(context).unfocus();
 
                                                                               await hasConnection().then((value) async {

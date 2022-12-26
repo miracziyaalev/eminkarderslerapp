@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomInputField extends StatelessWidget {
   final TextEditingController inputController;
@@ -41,11 +42,14 @@ class CustomInputField extends StatelessWidget {
                 spreadRadius: 0,
                 color: Colors.grey.withOpacity(.1)),
           ]),
-          child: TextField(
+          child: TextFormField(
             controller: inputController,
             onChanged: onChanged,
             keyboardType: TextInputType.number,
             style: const TextStyle(fontSize: 14, color: Colors.black),
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+            ],
             decoration: InputDecoration(
               labelStyle: const TextStyle(color: primaryColor),
               // prefixIcon: Icon(Icons.email),

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../../../product/language/language_items.dart';
 import '../LoginScreenWidgets/login_screen_widgets.dart';
+import '../LoginScreenWidgets/passwordButton.dart';
+import '../LoginScreenWidgets/userNameButton.dart';
 
 class FinalLoginScreen extends StatefulWidget {
   const FinalLoginScreen({Key? key}) : super(key: key);
@@ -44,8 +46,15 @@ class _FinalLoginScreenState extends State<FinalLoginScreen> {
                 SizedBox(height: constHeightValue),
                 const LoginPageTextWidget(),
                 const Text(LanguageItems.appName),
-                EmailFormWidget(controllerEmail: controllerEmail),
-                PasswordFormWidget(controllerPassword: controllerPassword),
+               const SizedBox(height: 30),
+                UsernameInput(
+                    textEditingController: controllerEmail,
+                    hintText: "Kullanıcı adınızı giriniz."),
+                const SizedBox(height: 30),
+                PasswordInput(
+                    textEditingController: controllerPassword,
+                    hintText: "Şifrenizi giriniz."),
+                const SizedBox(height: 30),
                 AccesWidget(
                     controllerEmail: controllerEmail,
                     controllerPassword: controllerPassword)
