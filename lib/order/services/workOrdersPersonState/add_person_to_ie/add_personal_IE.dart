@@ -5,8 +5,17 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AddPersonalIE {
-  static Future<dynamic> addPersonnelIE(String workBench, String workOrder,
-      int operationCode, String jobNo, String notes, String mamulKod) async {
+  static Future<dynamic> addPersonnelIE({
+    required String workBench,
+    required String workOrder,
+    required int operationCode,
+    required String jobNo,
+    required String notes,
+    required String mamulKod,
+    required int operationNumber,
+    required String operationName,
+    required String kalipKodu,
+  }) async {
     try {
       var response = await http.post(
           Uri.parse('${Constants.baseURL}${Constants.getWorktoPerson}'),
@@ -20,6 +29,9 @@ class AddPersonalIE {
             "operationCode": operationCode,
             "jobNo": jobNo,
             "notes": notes,
+            "operation": operationNumber,
+            "operationName": operationName,
+            "kalipKod": kalipKodu,
             "mamulKod": mamulKod
           }));
 

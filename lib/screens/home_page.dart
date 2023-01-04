@@ -4,7 +4,6 @@ import 'package:eminkardeslerapp/order/model/cycle_model.dart';
 import 'package:eminkardeslerapp/order/model/inside_orders_model.dart';
 import 'package:eminkardeslerapp/order/model/orders_model.dart';
 import 'package:eminkardeslerapp/screens/LoginScreen/LoginScreenView/final_login_screen.dart';
-import 'package:eminkardeslerapp/screens/final_machine.dart';
 import 'package:eminkardeslerapp/screens/operationPage/views/OperationStateCheckerView.dart';
 import 'package:eminkardeslerapp/screens/operationPage/widgets/components/dialogWidget.dart';
 import 'package:eminkardeslerapp/screens/orders/work_orders_screen.dart';
@@ -55,9 +54,9 @@ class _HomeState extends State<Home> {
       Tab(text: 'Profil Sayfası', icon: Icon(Icons.person_outline_rounded)),
       Tab(text: 'İş Emirleri', icon: Icon(Icons.workspace_premium_sharp)),
       Tab(text: 'Operasyon', icon: Icon(Icons.timelapse_sharp)),
-      Tab(
-          text: 'Üretim Sahası',
-          icon: Icon(Icons.auto_awesome_mosaic_outlined)),
+      //   Tab(
+      //      text: 'Üretim Sahası',
+      //      icon: Icon(Icons.auto_awesome_mosaic_outlined)),
     ];
 
     return DefaultTabController(
@@ -82,7 +81,6 @@ class _HomeState extends State<Home> {
             chosenWorkBench: chosenWorkBench,
             insideOrders: insideOrders,
           ),
-          const FinalMachineState()
         ]),
         drawer: Drawer(
           child: Stack(

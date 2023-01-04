@@ -7,13 +7,14 @@ import 'package:eminkardeslerapp/core/core_padding.dart';
 import 'package:eminkardeslerapp/order/model/cycle_model.dart';
 import 'package:eminkardeslerapp/order/model/inside_orders_model.dart';
 import 'package:eminkardeslerapp/order/model/orders_model.dart';
+import 'package:eminkardeslerapp/order/services/fire/addFireServices.dart';
 import 'package:eminkardeslerapp/order/services/qualityServices/qualityServices.dart';
 import 'package:eminkardeslerapp/order/services/workOrdersPersonState/addDurus.dart';
 import 'package:eminkardeslerapp/order/services/workOrdersPersonState/closeDurus.dart';
 import 'package:eminkardeslerapp/order/services/workOrdersPersonState/endOfTheDay.dart';
 import 'package:eminkardeslerapp/order/services/workOrdersPersonState/endOfTheWorkOrder.dart';
 import 'package:eminkardeslerapp/providers/final_screen_providers.dart';
-import 'package:eminkardeslerapp/screens/operationPage/viewModel/operationViewModel.dart';
+
 import 'package:eminkardeslerapp/screens/operationPage/widgets/components/customTextField.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -21,6 +22,8 @@ import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../order/model/fire/SFDC20T_model.dart';
+import '../../../../order/services/fire/getActiveSFDC20TServices.dart';
 import '../../../home_page.dart';
 
 const List<String> list = <String>['One', 'Two', 'Three', 'Four'];
@@ -34,6 +37,13 @@ class StopReasons {
       {required this.stopCode,
       required this.stopMessage,
       required this.stopValue});
+}
+
+class FireReasons {
+  final int fireCode;
+  final String fireSebep;
+
+  FireReasons({required this.fireCode, required this.fireSebep});
 }
 
 class FinalScreen extends StatefulWidget {
@@ -59,11 +69,14 @@ class _FinalScreenState extends State<FinalScreen> {
 
   GetWorkOrdersInfModel? get allModels => widget.allModels;
   CycleModel? get getCycleModel => widget.getCycleModel;
-  OperationViewModel operationViewModel = OperationViewModel();
+  late Sfdc20tModel sfdc20T;
+
   late StreamController<bool> streamController;
+  late StreamController<bool> streamControllerFire;
   late StreamController<bool> streamControllerStop;
   TextEditingController textController = TextEditingController();
   TextEditingController textController2 = TextEditingController();
+  TextEditingController textController3 = TextEditingController();
 
   Future<bool> hasConnection() async {
     bool hasInternet = false;
@@ -82,12 +95,22 @@ class _FinalScreenState extends State<FinalScreen> {
     Constants.workOrderIE = prefs.getString('workOrderIE')!;
   }
 
+  Future<void> getActiveTrnum() async {
+    await Sfdc20TActive.fetchSfdc20TActive().then((value) {
+      if (value != null) {
+        sfdc20T = value;
+      }
+    });
+  }
+
   @override
   void initState() {
     saveRequiredParameters();
+    getActiveTrnum();
     // readRequiredParameters();
     streamController = BehaviorSubject<bool>();
     streamControllerStop = BehaviorSubject<bool>();
+    streamControllerFire = BehaviorSubject<bool>();
     //  constValues().then((value) => getConsValues());
 
     super.initState();
@@ -170,6 +193,7 @@ class _FinalScreenState extends State<FinalScreen> {
     String denemeMMPS = "İE.22.1907";
 
     int selectedValue = 00;
+    int selectedFireCode = 500;
 
     List<StopReasons> stopReasons = [
       StopReasons(
@@ -262,6 +286,23 @@ class _FinalScreenState extends State<FinalScreen> {
         stopMessage: "Hava arızası",
         stopValue: "D",
       ),
+    ];
+
+    List<FireReasons> fireReasons = [
+      FireReasons(fireCode: 500, fireSebep: "Tashih"),
+      FireReasons(fireCode: 510, fireSebep: "Döküm Boşluğu"),
+      FireReasons(fireCode: 520, fireSebep: "Hatalı İşleme"),
+      FireReasons(fireCode: 530, fireSebep: "Kalıp Ayar Hatası"),
+      FireReasons(fireCode: 540, fireSebep: "Döküm Hatası - Baskı Sırasında"),
+      FireReasons(fireCode: 550, fireSebep: "Makina Ayar Hatası"),
+      FireReasons(fireCode: 560, fireSebep: "Test Hatası"),
+      FireReasons(fireCode: 610, fireSebep: "Parça Sümüklü"),
+      FireReasons(fireCode: 620, fireSebep: "Eksik Baskı"),
+      FireReasons(fireCode: 630, fireSebep: "Fırınlama Hatası"),
+      FireReasons(fireCode: 640, fireSebep: "Baskı Hatası"),
+      FireReasons(fireCode: 650, fireSebep: "Soğuk Birleşme"),
+      FireReasons(fireCode: 660, fireSebep: "Kalıp Ayar Hatası"),
+      FireReasons(fireCode: 570, fireSebep: "Önceki Operasyon Hatası"),
     ];
 
     return Scaffold(
@@ -423,8 +464,6 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                                                     }
                                                                                                   });
                                                                                                 }
-
-                                                                                               
                                                                                               });
                                                                                             },
                                                                                             child: const Text("Devam Et"),
@@ -675,6 +714,181 @@ class _FinalScreenState extends State<FinalScreen> {
                                                             width: 400,
                                                             child: Column(
                                                               children: [
+                                                                Row(
+                                                                  children: [
+                                                                    Expanded(
+                                                                      child: StreamBuilder<
+                                                                              bool>(
+                                                                          stream: streamControllerFire
+                                                                              .stream,
+                                                                          builder:
+                                                                              (context, snapshot) {
+                                                                            return Container(
+                                                                              alignment: Alignment.center,
+                                                                              padding: const EdgeInsets.all(5),
+                                                                              decoration: BoxDecoration(
+                                                                                borderRadius: BorderRadius.circular(20),
+                                                                                border: Border.all(
+                                                                                  color: Colors.blueGrey,
+                                                                                  width: 2,
+                                                                                ),
+                                                                              ),
+                                                                              child: DropdownButton(
+                                                                                underline: Container(),
+                                                                                isExpanded: false,
+                                                                                value: selectedFireCode,
+                                                                                items: fireReasons.map((e) {
+                                                                                  return DropdownMenuItem(
+                                                                                    child: Text(e.fireCode.toString() + " - " + e.fireSebep),
+                                                                                    value: e.fireCode,
+                                                                                  );
+                                                                                }).toList(),
+                                                                                onChanged: (int? value) {
+                                                                                  // This is called when the user selects an item.
+                                                                                  selectedFireCode = value!;
+                                                                                  streamControllerFire.add(true);
+                                                                                },
+                                                                              ),
+                                                                            );
+                                                                          }),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 20,
+                                                                ),
+                                                                Expanded(
+                                                                  child:
+                                                                      CustomInputField(
+                                                                    inputController:
+                                                                        textController3,
+                                                                    hintText:
+                                                                        "Fire Adedini Giriniz",
+                                                                    onChanged:
+                                                                        (p0) {
+                                                                      String
+                                                                          result =
+                                                                          p0 ??
+                                                                              "";
+                                                                    },
+                                                                  ),
+                                                                ),
+                                                                Expanded(
+                                                                  child: Row(
+                                                                    children: [
+                                                                      Expanded(
+                                                                        child:
+                                                                            SizedBox(
+                                                                          height:
+                                                                              CustomSize.height * 0.08,
+                                                                          child:
+                                                                              RawMaterialButton(
+                                                                            shape:
+                                                                                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                                                            fillColor:
+                                                                                Colors.red,
+                                                                            onPressed:
+                                                                                () async {
+                                                                              FocusScope.of(context).unfocus();
+
+                                                                              await hasConnection().then((value) async {
+                                                                                if (value == true) {
+                                                                                  AwesomeDialog(
+                                                                                          context: context,
+                                                                                          width: CustomSize.width * 0.6,
+                                                                                          title: "Fire bilirmeye emin misiniz?",
+                                                                                          btnOkOnPress: (() {
+                                                                                            Map<String, dynamic> fireSebep = {
+                                                                                              "fireSebep": fireReasons.firstWhere((element) => element.fireCode == selectedFireCode).fireSebep,
+                                                                                            };
+
+                                                                                            AddFire.addFireService(evrakNo: RequiredParameter.requiredEvrakNo, orTrnum: sfdc20T.trnum, sebep: selectedFireCode.toString(), sfMiktar: int.tryParse(textController3.text) ?? 0, kod: selectedFireCode.toString()).then((value) {
+                                                                                              if (value != null && value["status"] == 200) {
+                                                                                                Navigator.pop(context);
+                                                                                              } else if (value != null && value["status"] == 400) {
+                                                                                                //TODO: This screen will never trigger
+                                                                                              } else {
+                                                                                                //TODO: handle null return
+                                                                                              }
+                                                                                            });
+                                                                                          }),
+                                                                                          btnOkText: "Evet",
+                                                                                          btnCancelOnPress: () {},
+                                                                                          btnCancelText: "Hayir")
+                                                                                      .show();
+                                                                                } else {}
+                                                                              });
+                                                                            },
+                                                                            child:
+                                                                                const Text("Fire Bildir"),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            )),
+                                                      ),
+                                                    );
+                                                  });
+                                            },
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            child: Ink(
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    Constants.cardBorderRadius,
+                                                color: Colors.white,
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  "Fire Bildir",
+                                                  style: finalScreenTextStyle(),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: ProjectPaddingCore()
+                                              .paddingAllLow,
+                                          child: InkWell(
+                                            highlightColor:
+                                                Colors.blue.withOpacity(0.3),
+                                            splashColor:
+                                                Colors.yellow.withOpacity(0.8),
+                                            onTap: () {
+                                              showDialog<void>(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      shape: RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(20),
+                                                          side:
+                                                              const BorderSide(
+                                                                  color: Colors
+                                                                      .blueGrey,
+                                                                  width: 2)),
+                                                      alignment:
+                                                          Alignment.center,
+                                                      content: ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20),
+                                                        child: Container(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(10),
+                                                            height: 300,
+                                                            width: 400,
+                                                            child: Column(
+                                                              children: [
                                                                 Expanded(
                                                                   child:
                                                                       CustomInputField(
@@ -723,8 +937,6 @@ class _FinalScreenState extends State<FinalScreen> {
                                                                                 Colors.red,
                                                                             onPressed:
                                                                                 () async {
-                                                                                  
-                                                                              
                                                                               FocusScope.of(context).unfocus();
 
                                                                               await hasConnection().then((value) async {

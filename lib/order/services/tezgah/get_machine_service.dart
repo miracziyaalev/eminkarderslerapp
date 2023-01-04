@@ -56,4 +56,31 @@ class GetMachineStateService {
     }
     return null;
   }
+
+  static Future<List<dynamic>?> fetchAlternatifTezgah(
+      {required String mamulKod, required int siraNo}) async {
+    try {
+      var response = await http.get(
+        Uri.parse(
+            "${Constants.baseURL}${Constants.getAlternatifTezgah}$mamulKod&siraNo=$siraNo"),
+        headers: {"content-type": "application/json"},
+      );
+ 
+      if (response.statusCode == 200) {
+        List<dynamic> alternatifTezgah =
+            json.decode(response.body) as List<dynamic>;
+        var tempAlternatif =
+            alternatifTezgah.map((dynamic e) => e.trimRight()).toList();
+
+        return tempAlternatif;
+      } else {
+        // If the server did not return a 200 OK response,
+        // then throw an exception.
+        throw Exception('Failed to load info');
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+    return null;
+  }
 }

@@ -20,6 +20,7 @@ class GetInsideOrdersInfoModel {
     required this.rYMamulMiktar,
     required this.rSiraNo,
     required this.operasyonAd,
+    required this.rOperasyon,
   });
 
   String rKaynakKodu;
@@ -29,6 +30,7 @@ class GetInsideOrdersInfoModel {
   String rAcikKapali;
   int rYMamulMiktar;
   int rSiraNo;
+  int rOperasyon;
   String operasyonAd;
 
   factory GetInsideOrdersInfoModel.fromJson(Map<String, dynamic> json) =>
@@ -40,6 +42,7 @@ class GetInsideOrdersInfoModel {
         rAcikKapali: json["r_Acik_Kapali"] ?? "",
         rYMamulMiktar: json["r_YMamulMiktar"] ?? 0,
         rSiraNo: json["r_SiraNo"] ?? 0,
+        rOperasyon: json["r_Operasyon"] ?? 0,
         operasyonAd: json["operasyonAd"] ?? "",
       );
 
@@ -51,6 +54,7 @@ class GetInsideOrdersInfoModel {
         "r_Acik_Kapali": rAcikKapali,
         "r_YMamulMiktar": rYMamulMiktar,
         "r_SiraNo": rSiraNo,
+        "r_Operasyon": rOperasyon,
         "operasyonAd": operasyonAd,
       };
 }

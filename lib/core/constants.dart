@@ -16,6 +16,10 @@ class Constants {
   static String endOfTheWorkOrder = "Personel_IE/ClosePersonel_IE";
   static String addDurus = "Personel_IE/AddDurus";
   static String closeDurus = "Personel_IE/CloseDurus";
+  static String addFire = "Quality/AddSfdc20S";
+  static String getAciteveSfdc20T = "Quality/getActiveSfdc20T";
+  static String getAlternatifTezgah =
+      "Operation/alernatifTezgahList?BomrecCode=";
 
   static String bearerToken = "";
   static String userName = "";

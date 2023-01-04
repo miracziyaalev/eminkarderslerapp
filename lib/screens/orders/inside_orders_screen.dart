@@ -155,6 +155,24 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
     });
   }
 
+  Future<List?> getAlternatif(int siraNo) async {
+    final item =
+        ModalRoute.of(context)!.settings.arguments as GetWorkOrdersInfModel;
+
+    String mamulStokKodu = item.mamulstokkodu;
+    await GetMachineStateService.fetchAlternatifTezgah(
+            mamulKod: mamulStokKodu.trimRight(), siraNo: siraNo)
+        .then((value) {
+      if (value != null) {
+        var alternatifTezgah = value;
+        print(alternatifTezgah);
+        return alternatifTezgah;
+      }
+      return null;
+    });
+    return null;
+  }
+
   @override
   void dispose() {
     streamController.close();
@@ -411,6 +429,13 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                                                   .workBenchCode;
                                                             }
                                                           });
+                                                          await getAlternatif(
+                                                              insideOrders[
+                                                                      index]
+                                                                  .rSiraNo);
+
+                                                                  
+
                                                           await GetCycleTime
                                                                   .fetchCycleData(
                                                                       model
@@ -526,12 +551,15 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                                                                       height: CustomSize.height * 0.1,
                                                                                       width: CustomSize.width * 0.2,
                                                                                       decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: Colors.grey),
-                                                                                      child: Center(child: Text("Çevrim Süresi: ${getCycleModel[0].bomrecKaynak0Bv.toString()} ${getCycleModel[0].bomrecKaynak0Bu.toString()} ")),
+                                                                                      child: Center(child: Text("Çevrim Süresi: ${getCycleModel[0].bomrecKaynak0Bv.toString()} ${getCycleModel[0].bomrecKaynak0Bu.toString()} - ${getCycleModel[0].kalipKodu} ")),
                                                                                     ),
                                                                                     DropdownButton(
                                                                                       value: selectedValue,
                                                                                       items: getMachineStateModel.map((e) {
-                                                                                        return DropdownMenuItem(child: Text(e.workBenchCode + ' - ' + e.workBenchName), value: e.workBenchCode);
+                                                                                        return DropdownMenuItem(
+                                                                                          child: Text(e.workBenchCode + ' - ' + e.workBenchName),
+                                                                                          value: e.workBenchCode,
+                                                                                        );
                                                                                       }).toList(),
                                                                                       onChanged: (String? value) {
                                                                                         selectedValue = value ?? getMachineStateModel.first.workBenchName;
@@ -551,7 +579,7 @@ class _InsideOrderScreenState extends State<InsideOrderScreen> {
                                                                                                           title: "Operasyonu başlatmak için emin misiniz?",
                                                                                                           btnOkOnPress: () async {
                                                                                                             saveRequiredParameters();
-                                                                                                            await AddPersonalIE.addPersonnelIE(selectedValue, model.evrakno, (index + 1) * 10, item.jobNo, model.ad, model.mamulstokkodu).then((value) async {
+                                                                                                            await AddPersonalIE.addPersonnelIE(workBench: selectedValue, workOrder: model.evrakno, operationCode: (index + 1) * 10, jobNo: item.jobNo, notes: model.ad.trimRight(), mamulKod: model.mamulstokkodu, operationName: item.operasyonAd.trimRight(), operationNumber: item.rOperasyon, kalipKodu: getCycleModel[0].kalipKodu.trimRight()).then((value) async {
                                                                                                               if (value != null && value["status"] == 200) {
                                                                                                                 await QualityServices.isQualityCaseStarted(model.evrakno, model.ad).then(
                                                                                                                   (v) async {
